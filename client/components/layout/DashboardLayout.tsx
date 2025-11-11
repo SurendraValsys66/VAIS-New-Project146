@@ -61,6 +61,11 @@ import TrialProgressBar from "@/components/ui/trial-progress-bar";
 import TrialBanner from "@/components/ui/trial-banner";
 import TrialBadgeDropdown from "@/components/ui/trial-badge-dropdown";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import OnboardingSkipBadge from "@/components/layout/OnboardingSkipBadge";
 import { useTour } from "@/contexts/TourContext";
 import PlatformTour from "@/components/tour/PlatformTour";
