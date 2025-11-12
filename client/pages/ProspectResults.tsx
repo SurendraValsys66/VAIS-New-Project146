@@ -49,6 +49,7 @@ import {
   Target,
   Maximize,
   BarChart3,
+  Star,
   Building,
   Mail,
   Phone,
