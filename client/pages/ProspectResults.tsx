@@ -1353,6 +1353,23 @@ export default function ProspectResults() {
                     </TooltipTrigger>
                     <TooltipContent>Export</TooltipContent>
                   </Tooltip>
+
+                  {/* Add to List Button - Only show when items are selected */}
+                  {selectedItems.length > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="bg-valasys-orange hover:bg-valasys-orange/90"
+                          onClick={handleAddMultipleToList}
+                          size="icon"
+                          aria-label={`Add ${selectedItems.length} prospects to list`}
+                        >
+                          <Star className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Add to List</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             </CardHeader>
