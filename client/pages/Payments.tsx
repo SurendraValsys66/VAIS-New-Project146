@@ -893,6 +893,10 @@ export default function Payments() {
     );
   };
 
+  const handleAddPaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethodsList((prev) => [...prev, method]);
+  };
+
   const HeaderSort = ({
     label,
     field,
