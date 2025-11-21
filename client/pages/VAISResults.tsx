@@ -888,34 +888,11 @@ export default function VAISResults() {
           <Card className="shadow-sm relative">
             <CardHeader className="pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex items-center space-x-4">
-                    <CardTitle className="text-lg">Company Results</CardTitle>
-                    <Badge variant="secondary" className="bg-gray-100">
-                      {selectedItems.length} Items Selected
-                    </Badge>
-                  </div>
-
-                  {paginatedData.length > 0 && (
-                    <div className="flex items-center space-x-2 border-l pl-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSelectAll(true)}
-                        className="text-xs h-8 px-3 hover:bg-blue-50 text-blue-600 hover:text-blue-700"
-                      >
-                        Select All
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSelectAll(false)}
-                        className="text-xs h-8 px-3 hover:bg-gray-100 text-gray-600 hover:text-gray-700"
-                      >
-                        Deselect All
-                      </Button>
-                    </div>
-                  )}
+                <div className="flex items-center space-x-4">
+                  <CardTitle className="text-lg">Company Results</CardTitle>
+                  <Badge variant="secondary" className="bg-gray-100">
+                    {selectedItems.length} Items Selected
+                  </Badge>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Select
