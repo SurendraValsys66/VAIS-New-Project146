@@ -117,11 +117,13 @@ export default function Maintenance() {
         <div className="bg-gradient-to-r from-valasys-orange/5 to-valasys-blue/5 backdrop-blur-lg border border-valasys-gray-200 rounded-xl p-6 mb-8 shadow-md">
           <form
             className="flex flex-col sm:flex-row gap-3"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={handleNotifyMe}
           >
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="flex-1 px-4 py-3 rounded-lg bg-white border border-valasys-gray-300 text-valasys-gray-900 placeholder-valasys-gray-500 focus:outline-none focus:border-valasys-orange focus:ring-2 focus:ring-valasys-orange/20 transition-all duration-300"
             />
             <button
