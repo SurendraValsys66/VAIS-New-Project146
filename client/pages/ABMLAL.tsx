@@ -90,6 +90,7 @@ import { cn } from "@/lib/utils";
 import IntentSignalChart from "@/components/dashboard/IntentSignalChart";
 import QuickAccess from "@/components/dashboard/QuickAccess";
 import { useTour } from "@/contexts/TourContext";
+import { VAISFeedbackModal } from "@/components/ui/vais-feedback-modal";
 
 interface FileUploadState {
   file: File | null;
