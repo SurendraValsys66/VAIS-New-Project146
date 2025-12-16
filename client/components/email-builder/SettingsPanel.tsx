@@ -26,6 +26,79 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
   const renderSettings = () => {
     switch (block.type) {
+      case "title":
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="titleContent">Content</Label>
+              <textarea
+                id="titleContent"
+                value={block.content}
+                onChange={(e) =>
+                  onBlockUpdate({ ...block, content: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="titleFontSize">Font Size</Label>
+              <Input
+                id="titleFontSize"
+                type="number"
+                min="12"
+                max="72"
+                value={block.fontSize}
+                onChange={(e) =>
+                  onBlockUpdate({
+                    ...block,
+                    fontSize: parseInt(e.target.value),
+                  })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="titleFontColor">Text Color</Label>
+              <Input
+                id="titleFontColor"
+                type="color"
+                value={block.fontColor}
+                onChange={(e) =>
+                  onBlockUpdate({ ...block, fontColor: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="titleBgColor">Background Color</Label>
+              <Input
+                id="titleBgColor"
+                type="color"
+                value={block.backgroundColor}
+                onChange={(e) =>
+                  onBlockUpdate({ ...block, backgroundColor: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="titleAlignment">Alignment</Label>
+              <select
+                id="titleAlignment"
+                value={block.alignment}
+                onChange={(e) =>
+                  onBlockUpdate({
+                    ...block,
+                    alignment: e.target.value as any,
+                  })
+                }
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </div>
+        );
       case "text":
         return (
           <div className="space-y-4">
