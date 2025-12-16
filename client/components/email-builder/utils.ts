@@ -231,8 +231,16 @@ export function createButtonBlock(text = "Click me"): ButtonBlock {
     backgroundColor: "#FF6A00",
     textColor: "#ffffff",
     padding: 12,
+    margin: 0,
     borderRadius: 4,
+    borderWidth: 0,
+    borderColor: "#000000",
+    width: 100,
+    widthUnit: "%",
+    fontSize: 16,
+    fontWeight: "normal",
     alignment: "center",
+    visibility: "all",
   };
 }
 
