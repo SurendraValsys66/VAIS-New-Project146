@@ -2117,19 +2117,326 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         );
       case "html":
         return (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <Label htmlFor="htmlContent">HTML Content</Label>
-              <textarea
-                id="htmlContent"
-                value={block.content}
-                onChange={(e) =>
-                  onBlockUpdate({ ...block, content: e.target.value })
-                }
-                className="w-full border border-gray-300 rounded px-2 py-1 text-sm font-mono"
-                rows={6}
-                placeholder="<div>Your HTML here</div>"
-              />
+              <h4 className="text-xs font-bold text-gray-900 mb-3">
+                Code editor
+              </h4>
+              <div className="relative">
+                <div className="absolute left-0 top-0 bottom-0 bg-gray-100 border-r border-gray-300 w-10 flex items-start pt-2">
+                  <div className="w-full text-right pr-2">
+                    <span className="text-xs text-gray-500">1</span>
+                  </div>
+                </div>
+                <textarea
+                  id="htmlContent"
+                  value={block.content}
+                  onChange={(e) =>
+                    onBlockUpdate({ ...block, content: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded pl-12 pr-2 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-valasys-orange"
+                  rows={10}
+                  placeholder="<div>Your HTML here</div>"
+                  style={{ lineHeight: "1.5" }}
+                />
+                <button
+                  className="absolute right-2 top-2 text-xs text-valasys-orange font-semibold hover:text-valasys-orange"
+                  onClick={() => {
+                    const textarea = document.getElementById("htmlContent") as HTMLTextAreaElement;
+                    if (textarea) {
+                      textarea.style.height = "auto";
+                      textarea.style.height = textarea.scrollHeight + "px";
+                    }
+                  }}
+                >
+                  Expand
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-gray-900 mb-3">Layout</h4>
+              <div className="space-y-3">
+                <div>
+                  <Label
+                    htmlFor="htmlWidth"
+                    className="text-xs text-gray-700 mb-1 block"
+                  >
+                    Width
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="htmlWidth"
+                      type="number"
+                      min="0"
+                      value={block.width}
+                      onChange={(e) =>
+                        onBlockUpdate({
+                          ...block,
+                          width: parseInt(e.target.value),
+                        })
+                      }
+                      className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                    />
+                    <select
+                      value={block.widthUnit}
+                      onChange={(e) =>
+                        onBlockUpdate({
+                          ...block,
+                          widthUnit: e.target.value as "px" | "%",
+                        })
+                      }
+                      className="px-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange"
+                    >
+                      <option value="%">%</option>
+                      <option value="px">px</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-xs font-bold text-gray-900">Spacing</h4>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs text-gray-700">Padding</Label>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="htmlGroupPadding"
+                        checked={groupPaddingSides}
+                        onCheckedChange={(checked) =>
+                          setGroupPaddingSides(checked as boolean)
+                        }
+                      />
+                      <Label
+                        htmlFor="htmlGroupPadding"
+                        className="text-xs text-gray-600 cursor-pointer"
+                      >
+                        Group sides
+                      </Label>
+                    </div>
+                  </div>
+                  {groupPaddingSides ? (
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={paddingTop}
+                        onChange={(e) =>
+                          handlePaddingChange(parseInt(e.target.value))
+                        }
+                        className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                      />
+                      <span className="px-2 py-1 text-sm text-gray-600">
+                        px
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ↑
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={paddingTop}
+                          onChange={(e) =>
+                            handlePaddingChange(parseInt(e.target.value), "top")
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          →
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={paddingRight}
+                          onChange={(e) =>
+                            handlePaddingChange(
+                              parseInt(e.target.value),
+                              "right",
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ↓
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={paddingBottom}
+                          onChange={(e) =>
+                            handlePaddingChange(
+                              parseInt(e.target.value),
+                              "bottom",
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ←
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={paddingLeft}
+                          onChange={(e) =>
+                            handlePaddingChange(
+                              parseInt(e.target.value),
+                              "left",
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs text-gray-700">Margin</Label>
+                  </div>
+                  {!groupMarginSides ? (
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={marginTop}
+                        onChange={(e) =>
+                          handleMarginChange(parseInt(e.target.value))
+                        }
+                        className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                      />
+                      <span className="px-2 py-1 text-sm text-gray-600">
+                        px
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ↑
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={marginTop}
+                          onChange={(e) =>
+                            handleMarginChange(parseInt(e.target.value), "top")
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          →
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={marginRight}
+                          onChange={(e) =>
+                            handleMarginChange(
+                              parseInt(e.target.value),
+                              "right",
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ↓
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={marginBottom}
+                          onChange={(e) =>
+                            handleMarginChange(
+                              parseInt(e.target.value),
+                              "bottom",
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-6 text-center">
+                          ←
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={marginLeft}
+                          onChange={(e) =>
+                            handleMarginChange(parseInt(e.target.value), "left")
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-bold text-gray-900 mb-3">
+                Show on
+              </h4>
+              <p className="text-xs text-gray-500 mb-3">
+                Display content based on the type of device or other specific
+                conditions
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={block.visibility === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onBlockUpdate({ ...block, visibility: "all" })}
+                  className="text-xs"
+                >
+                  All devices
+                </Button>
+                <Button
+                  variant={
+                    block.visibility === "desktop" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() =>
+                    onBlockUpdate({ ...block, visibility: "desktop" })
+                  }
+                  className="text-xs"
+                >
+                  Only on desktop
+                </Button>
+                <Button
+                  variant={
+                    block.visibility === "mobile" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() =>
+                    onBlockUpdate({ ...block, visibility: "mobile" })
+                  }
+                  className="text-xs"
+                >
+                  Only on mobile
+                </Button>
+              </div>
             </div>
           </div>
         );
