@@ -348,6 +348,30 @@ export function createSplitImageCardBlock(
   };
 }
 
+export function createHeaderLogoAndDividerTemplate(): ContentBlock[] {
+  return [createLogoBlock(), createDividerBlock()];
+}
+
+export function createHeaderLogoAndSocialTemplate(): ContentBlock[] {
+  return [
+    createLogoBlock(),
+    createHtmlBlock(
+      '<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="50%"></td><td width="50%" align="right"><!-- Social icons will render here --></td></tr></table>',
+    ),
+    createSocialBlock(),
+  ];
+}
+
+export function createHeaderLogoAndNavigationTemplate(): ContentBlock[] {
+  const nav = createNavigationBlock();
+  nav.items = [
+    { label: "Order now", link: "#" },
+    { label: "Contact us", link: "#" },
+    { label: "Find a shop", link: "#" },
+  ];
+  return [createLogoBlock(), nav, createDividerBlock()];
+}
+
 export function createTwoColumnCardBlock(): HtmlBlock {
   return {
     type: "html",
