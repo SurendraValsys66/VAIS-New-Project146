@@ -117,6 +117,66 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
     }
   }, [selectedBlockId]);
 
+  const handleDeleteBlockById = useCallback((blockId: string) => {
+    setTemplate((prev) => ({
+      ...prev,
+      blocks: prev.blocks.filter((b) => b.id !== blockId),
+      updatedAt: new Date().toISOString(),
+    }));
+    setSelectedBlockId(null);
+  }, []);
+
+  const handleMoveBlockUp = useCallback((index: number) => {
+    if (index <= 0) return;
+    setTemplate((prev) => {
+      const newBlocks = [...prev.blocks];
+      [newBlocks[index - 1], newBlocks[index]] = [
+        newBlocks[index],
+        newBlocks[index - 1],
+      ];
+      return {
+        ...prev,
+        blocks: newBlocks,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  const handleMoveBlockDown = useCallback((index: number) => {
+    setTemplate((prev) => {
+      if (index >= prev.blocks.length - 1) return prev;
+      const newBlocks = [...prev.blocks];
+      [newBlocks[index], newBlocks[index + 1]] = [
+        newBlocks[index + 1],
+        newBlocks[index],
+      ];
+      return {
+        ...prev,
+        blocks: newBlocks,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  }, []);
+
+  const handleDuplicateBlock = useCallback(
+    (block: ContentBlock, position: number) => {
+      const duplicatedBlock: ContentBlock = {
+        ...JSON.parse(JSON.stringify(block)),
+        id: Math.random().toString(36).substring(2, 15),
+      };
+      setTemplate((prev) => {
+        const newBlocks = [...prev.blocks];
+        newBlocks.splice(position, 0, duplicatedBlock);
+        return {
+          ...prev,
+          blocks: newBlocks,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+    },
+    [],
+  );
+
   const handleMoveBlock = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragBlock = template.blocks[dragIndex];
