@@ -274,7 +274,11 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
 
           {/* Main Content */}
           <div className="flex-1 flex overflow-hidden">
-            {previewMode ? (
+            {showSourceCode ? (
+              <div className="flex-1">
+                <SourceCodeView template={template} />
+              </div>
+            ) : previewMode ? (
               <div className="flex-1">
                 <EmailPreview template={template} />
               </div>
