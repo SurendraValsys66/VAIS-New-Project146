@@ -276,6 +276,8 @@ export interface FooterWithSocialBlock {
     alignment: "left" | "center" | "right";
     padding: number;
     margin: number;
+    width: number;
+    widthUnit: "px" | "%";
   };
   enterpriseName: {
     content: string;

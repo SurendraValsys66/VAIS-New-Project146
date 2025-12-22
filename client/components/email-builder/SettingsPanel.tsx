@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, X } from "lucide-react";
 import { SocialLinksEditor } from "./SocialLinksEditor";
+import { FooterSocialLinksEditor } from "./FooterSocialLinksEditor";
 
 interface SettingsPanelProps {
   block: ContentBlock | null;
@@ -2426,6 +2427,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             {selectedFooterElement === "social" && (
               <>
                 <div>
+                  <FooterSocialLinksEditor
+                    block={block as any}
+                    onBlockUpdate={onBlockUpdate}
+                  />
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
                   <h4 className="text-xs font-bold text-gray-900 mb-3">
                     Icon Design
                   </h4>
@@ -2521,7 +2529,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         htmlFor="socialSpacing"
                         className="text-xs text-gray-700 mb-1 block"
                       >
-                        Space between icons
+                        Space between links
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -2544,6 +2552,74 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                           px
                         </span>
                       </div>
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="socialWidth"
+                        className="text-xs text-gray-700 mb-1 block"
+                      >
+                        Width
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="socialWidth"
+                          type="number"
+                          min="0"
+                          value={block.social.width}
+                          onChange={(e) =>
+                            onBlockUpdate({
+                              ...block,
+                              social: {
+                                ...block.social,
+                                width: parseInt(e.target.value),
+                              },
+                            })
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <select
+                          value={block.social.widthUnit}
+                          onChange={(e) =>
+                            onBlockUpdate({
+                              ...block,
+                              social: {
+                                ...block.social,
+                                widthUnit: e.target.value as any,
+                              },
+                            })
+                          }
+                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange"
+                        >
+                          <option value="%">%</option>
+                          <option value="px">px</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="socialAlignment"
+                        className="text-xs text-gray-700 mb-1 block"
+                      >
+                        Block Alignment
+                      </Label>
+                      <select
+                        id="socialAlignment"
+                        value={block.social.alignment}
+                        onChange={(e) =>
+                          onBlockUpdate({
+                            ...block,
+                            social: {
+                              ...block.social,
+                              alignment: e.target.value as any,
+                            },
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange"
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
                     </div>
                   </div>
                 </div>
