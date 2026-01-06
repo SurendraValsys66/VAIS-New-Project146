@@ -212,7 +212,7 @@ export const LandingPageBuilder: React.FC<LandingPageBuilderProps> = ({
       </div>
 
       {/* Right Sidebar - Settings Panel */}
-      <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
+      <div className="w-80 bg-white border-l border-gray-200 overflow-hidden">
         <SettingsPanel
           block={selectedBlock}
           onBlockUpdate={(updatedBlock) => {
