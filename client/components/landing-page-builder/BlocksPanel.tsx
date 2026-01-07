@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight, Grid3x3, Settings, Zap, Share2, Lock, Palette } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Grid3x3,
+  Settings,
+  Zap,
+  Share2,
+  Lock,
+  Palette,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   createHeaderBlock,
@@ -40,14 +49,15 @@ interface SectionGroup {
   items: BlockItem[];
 }
 
-export const BlocksPanel: React.FC<BlocksPanelProps> = ({ onAddBlock, onSelectBlockVariant }) => {
+export const BlocksPanel: React.FC<BlocksPanelProps> = ({
+  onAddBlock,
+  onSelectBlockVariant,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["start", "basics", "cms", "elements"]),
   );
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const getIconColor = (itemId: string) => {
     const iconMap: Record<string, string> = {
@@ -71,7 +81,7 @@ export const BlocksPanel: React.FC<BlocksPanelProps> = ({ onAddBlock, onSelectBl
   const getIcon = (itemId: string) => {
     const iconSize = "w-5 h-5";
     const colorClass = getIconColor(itemId);
-    
+
     const iconMap: Record<string, React.ReactNode> = {
       sections: <Grid3x3 className={`${iconSize} ${colorClass}`} />,
       navigation: <Settings className={`${iconSize} ${colorClass}`} />,
@@ -372,7 +382,9 @@ export const BlocksPanel: React.FC<BlocksPanelProps> = ({ onAddBlock, onSelectBl
                             >
                               <div className="font-medium">{variant.name}</div>
                               {variant.description && (
-                                <div className="text-gray-400 text-xs mt-0.5">{variant.description}</div>
+                                <div className="text-gray-400 text-xs mt-0.5">
+                                  {variant.description}
+                                </div>
                               )}
                             </button>
                           ))}
