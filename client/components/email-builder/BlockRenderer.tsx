@@ -20,6 +20,7 @@ import { CenteredImageCardBlockComponent } from "./blocks/CenteredImageCardBlock
 import { SplitImageCardBlockComponent } from "./blocks/SplitImageCardBlockComponent";
 import { TwoColumnCardBlockComponent } from "./blocks/TwoColumnCardBlockComponent";
 import { StatsBlockComponent } from "./blocks/StatsBlockComponent";
+import { FeaturesBlockComponent } from "./blocks/FeaturesBlockComponent";
 
 interface BlockRendererProps {
   block: ContentBlock;
