@@ -13,23 +13,18 @@ export const VideoBlockComponent: React.FC<VideoBlockComponentProps> = ({
   isSelected,
   onSrcChange,
 }) => {
-  const width =
-    block.widthUnit === "%"
-      ? `${block.width}%`
-      : `${block.width}px`;
-
   const borderStyle =
     block.borderWidth > 0
       ? `border: ${block.borderWidth}px solid ${block.borderColor};`
       : "";
 
   const containerStyle: React.CSSProperties = {
-    width: width,
+    width: "100%",
     textAlign: block.alignment as any,
     padding: `${block.padding}px`,
     margin: `${block.margin}px`,
     borderRadius: `${block.borderRadius}px`,
-    display: block.alignment === "center" ? "block" : "inline-block",
+    display: "block",
     marginLeft: block.alignment === "center" ? "auto" : undefined,
     marginRight: block.alignment === "center" ? "auto" : undefined,
   };
@@ -49,14 +44,13 @@ export const VideoBlockComponent: React.FC<VideoBlockComponentProps> = ({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    height: block.height,
     backgroundColor: "#f5f5f5",
     borderRadius: `${block.borderRadius}px`,
   };
 
   const placeholderStyle: React.CSSProperties = {
     width: "100%",
-    height: block.height,
+    minHeight: "300px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
