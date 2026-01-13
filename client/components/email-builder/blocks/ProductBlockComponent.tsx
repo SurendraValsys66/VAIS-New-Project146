@@ -11,6 +11,18 @@ export const ProductBlockComponent: React.FC<ProductBlockComponentProps> = ({
   block,
   isSelected,
 }) => {
+  const imageMargin = {
+    left: "0 auto 12px 0",
+    right: "0 0 12px auto",
+    center: "0 auto 12px auto",
+  };
+
+  const imageAlignment = {
+    left: "flex-start",
+    right: "flex-end",
+    center: "center",
+  };
+
   return (
     <div
       className={`relative p-4 transition-all ${
@@ -24,37 +36,43 @@ export const ProductBlockComponent: React.FC<ProductBlockComponentProps> = ({
           borderRadius: "8px",
           padding: "16px",
           backgroundColor: "#ffffff",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        {block.image ? (
-          <img
-            src={block.image}
-            alt={block.title}
-            style={{
-              width: "100%",
-              maxWidth: "300px",
-              height: "auto",
-              marginBottom: "12px",
-              borderRadius: "4px",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "300px",
-              height: "200px",
-              backgroundColor: "#f0f0f0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "12px",
-              borderRadius: "4px",
-            }}
-          >
-            <ShoppingCart className="w-8 h-8 text-gray-400" />
-          </div>
-        )}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: imageAlignment[block.imagePosition] || "center",
+            marginBottom: "12px",
+          }}
+        >
+          {block.image ? (
+            <img
+              src={block.image}
+              alt={block.title}
+              style={{
+                maxWidth: "300px",
+                height: "auto",
+                borderRadius: "4px",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "300px",
+                height: "200px",
+                backgroundColor: "#f0f0f0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "4px",
+              }}
+            >
+              <ShoppingCart className="w-8 h-8 text-gray-400" />
+            </div>
+          )}
+        </div>
 
         <h3
           style={{
@@ -83,27 +101,34 @@ export const ProductBlockComponent: React.FC<ProductBlockComponentProps> = ({
             fontSize: "16px",
             fontWeight: "bold",
             color: "#FF6A00",
-            margin: "0 0 12px 0",
+            margin: "0 0 16px 0",
           }}
         >
           {block.price}
         </p>
 
-        <a
-          href={block.buttonLink}
+        <div
           style={{
-            backgroundColor: "#FF6A00",
-            color: "white",
-            padding: "10px 20px",
-            textDecoration: "none",
-            borderRadius: "4px",
-            display: "inline-block",
-            fontSize: "14px",
-            fontWeight: "bold",
+            display: "flex",
+            justifyContent: block.alignment === "center" ? "center" : block.alignment === "right" ? "flex-end" : "flex-start",
           }}
         >
-          {block.buttonText}
-        </a>
+          <a
+            href={block.buttonLink}
+            style={{
+              backgroundColor: "#FF6A00",
+              color: "white",
+              padding: "10px 20px",
+              textDecoration: "none",
+              borderRadius: "4px",
+              display: "inline-block",
+              fontSize: "14px",
+              fontWeight: "bold",
+            }}
+          >
+            {block.buttonText}
+          </a>
+        </div>
       </div>
     </div>
   );
