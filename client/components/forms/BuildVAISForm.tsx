@@ -729,12 +729,14 @@ export default function BuildVAISForm() {
                       </Label>
                       <Select
                         value={formData.productSubcategory}
-                        onValueChange={(value) =>
+                        onValueChange={(value) => {
                           setFormData({
                             ...formData,
                             productSubcategory: value,
-                          })
-                        }
+                          });
+                          // Trigger blink on the product category field
+                          triggerFieldBlink("productCategory");
+                        }}
                       >
                         <SelectTrigger
                           className={cn(
