@@ -1334,6 +1334,7 @@ export default function BuildVAISForm() {
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer",
+                    blinkingField === "uploadFile" ? "border-blink" : "",
                     dragActive
                       ? "border-valasys-orange bg-valasys-orange/5 scale-105"
                       : "border-valasys-gray-300 hover:border-valasys-orange hover:bg-valasys-orange/5",
