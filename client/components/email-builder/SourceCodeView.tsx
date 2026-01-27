@@ -46,11 +46,11 @@ export const SourceCodeView: React.FC<SourceCodeViewProps> = ({ template }) => {
             variant="outline"
             size="sm"
             onClick={handleCopy}
-            className="gap-2 group"
+            className="flex flex-col items-center justify-center group p-2 h-auto"
             title={copied ? "Copied!" : "Copy Code"}
           >
             <Copy className="w-4 h-4" />
-            <span className="hidden group-hover:inline text-xs">
+            <span className="hidden group-hover:block text-xs mt-1 whitespace-nowrap">
               {copied ? "Copied!" : "Copy Code"}
             </span>
           </Button>
@@ -58,11 +58,11 @@ export const SourceCodeView: React.FC<SourceCodeViewProps> = ({ template }) => {
             variant="outline"
             size="sm"
             onClick={handleDownload}
-            className="gap-2 group"
+            className="flex flex-col items-center justify-center group p-2 h-auto"
             title="Download"
           >
             <Download className="w-4 h-4" />
-            <span className="hidden group-hover:inline text-xs">
+            <span className="hidden group-hover:block text-xs mt-1 whitespace-nowrap">
               Download
             </span>
           </Button>
