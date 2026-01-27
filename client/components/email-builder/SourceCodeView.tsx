@@ -239,17 +239,17 @@ export const SourceCodeView: React.FC<SourceCodeViewProps> = ({ template }) => {
                   <Download className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleDownloadHTML}>
-                  <Download className="w-4 h-4 mr-2" />
+              <DropdownMenuContent align="end" className="w-max">
+                <DropdownMenuItem onClick={handleDownloadHTML} className="py-2.5">
+                  <Download className="w-4 h-4 mr-3" />
                   Download HTML
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownloadPDF}>
-                  <Download className="w-4 h-4 mr-2" />
+                <DropdownMenuItem onClick={handleDownloadPDF} className="py-2.5">
+                  <Download className="w-4 h-4 mr-3" />
                   Download Preview (PDF)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownloadJSON}>
-                  <FileJson className="w-4 h-4 mr-2" />
+                <DropdownMenuItem onClick={handleDownloadJSON} className="py-2.5">
+                  <FileJson className="w-4 h-4 mr-3" />
                   Download Template (JSON)
                 </DropdownMenuItem>
               </DropdownMenuContent>
