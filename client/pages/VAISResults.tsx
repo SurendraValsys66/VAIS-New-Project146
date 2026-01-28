@@ -585,15 +585,47 @@ export default function VAISResults() {
     setUnlockModalOpen(true);
   };
 
-  const handleUnlockCurrent = () => {
-    if (currentlyClickedBadgeId) {
-      setUnlockedBadges((prev) => new Set([...prev, currentlyClickedBadgeId]));
-    }
-  };
+  const handleUnlock = (selectedOption: string) => {
+    let badgesToUnlock: string[] = [];
 
-  const handleUnlockAll = () => {
-    const allBadgeIds = paginatedData.map((item) => item.id);
-    setUnlockedBadges((prev) => new Set([...prev, ...allBadgeIds]));
+    switch (selectedOption) {
+      case "current":
+        // Unlock only the currently clicked badge
+        if (currentlyClickedBadgeId) {
+          badgesToUnlock = [currentlyClickedBadgeId];
+        }
+        break;
+
+      case "super_strong":
+        // Unlock only companies with "Super Strong" intent signal
+        badgesToUnlock = paginatedData
+          .filter((item) => item.intentSignal === "Super Strong")
+          .map((item) => item.id);
+        break;
+
+      case "very_strong":
+        // Unlock companies with "Very Strong" intent signal
+        badgesToUnlock = paginatedData
+          .filter((item) => item.intentSignal === "Very Strong")
+          .map((item) => item.id);
+        break;
+
+      case "strong":
+        // Unlock companies with "Strong" intent signal
+        badgesToUnlock = paginatedData
+          .filter((item) => item.intentSignal === "Strong")
+          .map((item) => item.id);
+        break;
+
+      case "all":
+        // Unlock all badges
+        badgesToUnlock = paginatedData.map((item) => item.id);
+        break;
+    }
+
+    if (badgesToUnlock.length > 0) {
+      setUnlockedBadges((prev) => new Set([...prev, ...badgesToUnlock]));
+    }
   };
 
   const PremiumOverlay = () => (
