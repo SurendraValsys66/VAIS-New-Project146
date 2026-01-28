@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import CancelSubscriptionModal from "@/components/auth/CancelSubscriptionModal";
 import {
   Settings as SettingsIcon,
   User,
@@ -46,12 +48,15 @@ import {
   Calendar,
   Clock,
   Crown,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [cancelSubscriptionOpen, setCancelSubscriptionOpen] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     browser: true,
@@ -114,6 +119,8 @@ export default function Settings() {
     credits: 8450,
     nextBilling: new Date("2024-02-15"),
     usageThisMonth: 2150,
+    subscriptionActivatedDate: new Date("2023-06-15"),
+    planExpiryDate: new Date("2024-06-15"),
   });
 
   const availableCredit = Math.max(0, billing.credits - billing.usageThisMonth);
@@ -147,6 +154,14 @@ export default function Settings() {
   const handleGenerateApiKey = () => {
     const newKey = "vls_" + Math.random().toString(36).substring(2, 32);
     setApiSettings({ ...apiSettings, apiKey: newKey });
+  };
+
+  const handleCancelSubscriptionConfirm = (email: string, reason: string) => {
+    console.log("Subscription cancellation confirmed:", {
+      email,
+      reason,
+      timestamp: new Date().toISOString(),
+    });
   };
 
   return (
@@ -196,279 +211,398 @@ export default function Settings() {
           <TabsContent value="profile">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
+                <div className="sticky top-6 self-start">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-r from-valasys-orange to-valasys-orange-light rounded-lg flex items-center justify-center">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                          <span>Personal Information</span>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Profile Photo</Label>
+                        <div className="flex items-center space-x-4">
+                          <Avatar className="h-16 w-16">
+                            <AvatarImage
+                              src={profile.avatarUrl || undefined}
+                              alt={`${profile.firstName} ${profile.lastName}`}
+                            />
+                            <AvatarFallback className="bg-valasys-orange text-white">
+                              {profile.firstName.charAt(0)}
+                              {profile.lastName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = () => {
+                                    const dataUrl = reader.result as string;
+                                    setProfile((prev) => ({
+                                      ...prev,
+                                      avatarUrl: dataUrl,
+                                    }));
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="border-valasys-orange text-valasys-orange hover:bg-valasys-orange hover:text-white"
+                            >
+                              <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                            </Button>
+                            {profile.avatarUrl && (
+                              <Button
+                                variant="ghost"
+                                onClick={() =>
+                                  setProfile({ ...profile, avatarUrl: null })
+                                }
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="firstName">
+                            First Name <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="firstName"
+                            placeholder="Enter first name"
+                            required
+                            aria-required="true"
+                            value={profile.firstName}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                firstName: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName">
+                            Last Name <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="lastName"
+                            placeholder="Enter last name"
+                            required
+                            aria-required="true"
+                            value={profile.lastName}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                lastName: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="email">
+                            Business Email{" "}
+                            <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@company.com"
+                            required
+                            aria-required="true"
+                            value={profile.email}
+                            onChange={(e) =>
+                              setProfile({ ...profile, email: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input
+                            id="phone"
+                            placeholder="e.g. +1 555 123 4567"
+                            value={profile.phone}
+                            onChange={(e) =>
+                              setProfile({ ...profile, phone: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="company">
+                            Company Name <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="company"
+                            placeholder="Your company name"
+                            required
+                            aria-required="true"
+                            value={profile.company}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                company: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="role">Job Title</Label>
+                          <Input
+                            id="role"
+                            placeholder="Your job title"
+                            value={profile.role}
+                            onChange={(e) =>
+                              setProfile({ ...profile, role: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="location">Location</Label>
+                            <Input
+                              id="location"
+                              placeholder="City, Country"
+                              value={profile.location}
+                              onChange={(e) =>
+                                setProfile({
+                                  ...profile,
+                                  location: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="homeAddress">Home Address</Label>
+                            <Input
+                              id="homeAddress"
+                              placeholder="Street, City, State, ZIP"
+                              value={profile.homeAddress}
+                              onChange={(e) =>
+                                setProfile({
+                                  ...profile,
+                                  homeAddress: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="workAddress">Work Address</Label>
+                            <Input
+                              id="workAddress"
+                              placeholder="Company address"
+                              value={profile.workAddress}
+                              onChange={(e) =>
+                                setProfile({
+                                  ...profile,
+                                  workAddress: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="billingAddress">
+                              Billing Address
+                            </Label>
+                            <Input
+                              id="billingAddress"
+                              placeholder="Billing address"
+                              value={profile.billingAddress}
+                              onChange={(e) =>
+                                setProfile({
+                                  ...profile,
+                                  billingAddress: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="linkedInUrl">LinkedIn URL</Label>
+                            <Input
+                              id="linkedInUrl"
+                              type="url"
+                              placeholder="https://www.linkedin.com/in/username"
+                              value={profile.linkedInUrl}
+                              onChange={(e) =>
+                                setProfile({
+                                  ...profile,
+                                  linkedInUrl: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="xUrl">X URL</Label>
+                            <Input
+                              id="xUrl"
+                              type="url"
+                              placeholder="https://x.com/username"
+                              value={profile.xUrl}
+                              onChange={(e) =>
+                                setProfile({ ...profile, xUrl: e.target.value })
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-6 flex justify-center">
+                        <Button
+                          onClick={handleSaveProfile}
+                          className="bg-gradient-to-r from-valasys-orange to-valasys-orange-light text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-valasys-orange/40 h-12 px-8 min-w-[220px]"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Changes
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div>
+                {/* Current Plan Details */}
+                <Card className="bg-gradient-to-br from-valasys-orange/5 to-white border border-valasys-orange/20">
+                  <CardHeader className="pb-4">
                     <CardTitle>
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-gradient-to-r from-valasys-orange to-valasys-orange-light rounded-lg flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" />
+                          <Crown className="w-4 h-4 text-white" />
                         </div>
-                        <span>Personal Information</span>
+                        <span>Current Plan Details</span>
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Profile Photo</Label>
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-16 w-16">
-                          <AvatarImage
-                            src={profile.avatarUrl || undefined}
-                            alt={`${profile.firstName} ${profile.lastName}`}
+                  <CardContent className="space-y-6">
+                    {/* Plan Name */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <Label className="text-sm text-gray-600 flex items-center gap-2">
+                          <Crown
+                            className="w-4 h-4 text-valasys-orange"
+                            aria-hidden="true"
                           />
-                          <AvatarFallback className="bg-valasys-orange text-white">
-                            {profile.firstName.charAt(0)}
-                            {profile.lastName.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = () => {
-                                  const dataUrl = reader.result as string;
-                                  setProfile((prev) => ({
-                                    ...prev,
-                                    avatarUrl: dataUrl,
-                                  }));
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
+                          <span>Current Plan</span>
+                        </Label>
+                        <div className="font-semibold text-lg text-gray-900 mt-1">
+                          {billing.plan}
+                        </div>
+                      </div>
+                      <Badge className="bg-valasys-orange/10 text-valasys-orange border border-valasys-orange/30">
+                        Active
+                      </Badge>
+                    </div>
+
+                    {/* Credit Spent */}
+                    <div className="border-t border-valasys-orange/10 pt-4">
+                      <Label className="text-sm text-gray-600 flex items-center gap-2">
+                        <CreditCard
+                          className="w-4 h-4 text-valasys-orange"
+                          aria-hidden="true"
+                        />
+                        <span>Credit Spent</span>
+                      </Label>
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <span className="text-2xl font-bold text-gray-900">
+                          {metrics.creditsSpent.toLocaleString()}
+                        </span>
+                        <span className="text-sm text-gray-600">credits</span>
+                      </div>
+                    </div>
+
+                    {/* Subscription Dates */}
+                    <div className="border-t border-valasys-orange/10 pt-4 space-y-4">
+                      <div>
+                        <Label className="text-sm text-gray-600 flex items-center gap-2">
+                          <Calendar
+                            className="w-4 h-4 text-valasys-orange"
+                            aria-hidden="true"
                           />
-                          <Button
-                            variant="outline"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="border-valasys-orange text-valasys-orange hover:bg-valasys-orange hover:text-white"
-                          >
-                            <Upload className="w-4 h-4 mr-2" /> Upload Photo
-                          </Button>
-                          {profile.avatarUrl && (
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                setProfile({ ...profile, avatarUrl: null })
-                              }
-                            >
-                              Remove
-                            </Button>
+                          <span>Subscription Activated</span>
+                        </Label>
+                        <div className="font-medium text-gray-900 mt-1">
+                          {billing.subscriptionActivatedDate.toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
                           )}
                         </div>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">
-                          First Name <span className="text-red-500">*</span>
+
+                      <div>
+                        <Label className="text-sm text-gray-600 flex items-center gap-2">
+                          <Clock
+                            className="w-4 h-4 text-valasys-orange"
+                            aria-hidden="true"
+                          />
+                          <span>Plan Expiry Date</span>
                         </Label>
-                        <Input
-                          id="firstName"
-                          placeholder="Enter first name"
-                          required
-                          aria-required="true"
-                          value={profile.firstName}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              firstName: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">
-                          Last Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="lastName"
-                          placeholder="Enter last name"
-                          required
-                          aria-required="true"
-                          value={profile.lastName}
-                          onChange={(e) =>
-                            setProfile({ ...profile, lastName: e.target.value })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">
-                          Business Email <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="name@company.com"
-                          required
-                          aria-required="true"
-                          value={profile.email}
-                          onChange={(e) =>
-                            setProfile({ ...profile, email: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          placeholder="e.g. +1 555 123 4567"
-                          value={profile.phone}
-                          onChange={(e) =>
-                            setProfile({ ...profile, phone: e.target.value })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="company">
-                          Company Name <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                          id="company"
-                          placeholder="Your company name"
-                          required
-                          aria-required="true"
-                          value={profile.company}
-                          onChange={(e) =>
-                            setProfile({ ...profile, company: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="role">Job Title</Label>
-                        <Input
-                          id="role"
-                          placeholder="Your job title"
-                          value={profile.role}
-                          onChange={(e) =>
-                            setProfile({ ...profile, role: e.target.value })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="location">Location</Label>
-                          <Input
-                            id="location"
-                            placeholder="City, Country"
-                            value={profile.location}
-                            onChange={(e) =>
-                              setProfile({
-                                ...profile,
-                                location: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="homeAddress">Home Address</Label>
-                          <Input
-                            id="homeAddress"
-                            placeholder="Street, City, State, ZIP"
-                            value={profile.homeAddress}
-                            onChange={(e) =>
-                              setProfile({
-                                ...profile,
-                                homeAddress: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="workAddress">Work Address</Label>
-                          <Input
-                            id="workAddress"
-                            placeholder="Company address"
-                            value={profile.workAddress}
-                            onChange={(e) =>
-                              setProfile({
-                                ...profile,
-                                workAddress: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="billingAddress">
-                            Billing Address
-                          </Label>
-                          <Input
-                            id="billingAddress"
-                            placeholder="Billing address"
-                            value={profile.billingAddress}
-                            onChange={(e) =>
-                              setProfile({
-                                ...profile,
-                                billingAddress: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="linkedInUrl">LinkedIn URL</Label>
-                          <Input
-                            id="linkedInUrl"
-                            type="url"
-                            placeholder="https://www.linkedin.com/in/username"
-                            value={profile.linkedInUrl}
-                            onChange={(e) =>
-                              setProfile({
-                                ...profile,
-                                linkedInUrl: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="xUrl">X URL</Label>
-                          <Input
-                            id="xUrl"
-                            type="url"
-                            placeholder="https://x.com/username"
-                            value={profile.xUrl}
-                            onChange={(e) =>
-                              setProfile({ ...profile, xUrl: e.target.value })
-                            }
-                          />
+                        <div className="font-medium text-gray-900 mt-1">
+                          {billing.planExpiryDate.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-6 flex justify-center">
+                    {/* Upgrade and Cancel Buttons */}
+                    <div className="flex items-center gap-3 mt-4">
                       <Button
-                        onClick={handleSaveProfile}
-                        className="bg-gradient-to-r from-valasys-orange to-valasys-orange-light text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-valasys-orange/40 h-12 px-8 min-w-[220px]"
+                        onClick={() => navigate("/subscription")}
+                        className="flex-1 bg-gradient-to-r from-valasys-orange to-valasys-orange-light text-white shadow-md hover:shadow-lg hover:from-valasys-orange/90 hover:to-valasys-orange-light/90 transition-all"
                       >
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Changes
+                        <ArrowRight className="w-4 h-4 mr-2" />
+                        Upgrade Subscription
+                      </Button>
+
+                      <Button
+                        onClick={() => setCancelSubscriptionOpen(true)}
+                        variant="outline"
+                        className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        Cancel Subscription
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
-              </div>
 
-              <div>
                 {/* Usage Overview (similar to provided design) */}
-                <Card>
+                <Card className="mt-6">
                   <CardHeader>
                     <CardTitle>
                       <div className="flex items-center gap-2">
@@ -802,6 +936,20 @@ export default function Settings() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Cancel Subscription Modal */}
+        <CancelSubscriptionModal
+          open={cancelSubscriptionOpen}
+          onOpenChange={setCancelSubscriptionOpen}
+          userEmail={profile.email}
+          planDetails={{
+            plan: billing.plan,
+            credits: billing.credits,
+            nextBilling: billing.nextBilling,
+            planExpiryDate: billing.planExpiryDate,
+          }}
+          onConfirm={handleCancelSubscriptionConfirm}
+        />
       </div>
     </DashboardLayout>
   );

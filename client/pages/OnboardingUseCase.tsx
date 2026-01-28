@@ -10,15 +10,29 @@ import {
   emitOnboardingSkipReminderUpdate,
 } from "@/lib/onboardingStorage";
 import { useNavigate } from "react-router-dom";
-import { ListChecks, Rocket, Database } from "lucide-react";
+import {
+  Target,
+  Search,
+  Zap,
+  TrendingUp,
+  Database,
+  CheckCircle,
+  Copy,
+  HelpCircle,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import OnboardingSplitLayout from "@/components/onboarding/OnboardingSplitLayout";
 import OnboardingIllustration from "@/components/onboarding/OnboardingIllustration";
 
 const OPTIONS = [
-  { label: "Build accounts/prospects list", icon: ListChecks },
-  { label: "Build and run campaigns", icon: Rocket },
+  { label: "Build ABM", icon: Target },
+  { label: "Find Prospect", icon: Search },
+  { label: "Execute managed lead campaigns", icon: Zap },
+  { label: "Access Intent Data", icon: TrendingUp },
   { label: "Enrich CRM Data", icon: Database },
+  { label: "Verify Your Existing ABM", icon: CheckCircle },
+  { label: "Generate Look-Alike", icon: Copy },
+  { label: "Other", icon: HelpCircle },
 ] as const;
 
 export default function OnboardingUseCase() {

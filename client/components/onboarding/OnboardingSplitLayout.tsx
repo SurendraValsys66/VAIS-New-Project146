@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/utils";
 
 export default function OnboardingSplitLayout({
   left,
@@ -31,7 +31,7 @@ export default function OnboardingSplitLayout({
       </div>
 
       {/* Right side */}
-      <div className="relative hidden md:block">{right}</div>
+      <div className="relative hidden md:block bg-white">{right}</div>
     </div>
   );
 }

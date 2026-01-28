@@ -1,0 +1,63 @@
+import React from "react";
+import { ImageBlock } from "../types";
+import { Upload } from "lucide-react";
+
+interface ImageBlockComponentProps {
+  block: ImageBlock;
+  isSelected: boolean;
+  onSrcChange: (src: string) => void;
+  onDimensionChange: (width: number, height: number) => void;
+}
+
+export const ImageBlockComponent: React.FC<ImageBlockComponentProps> = ({
+  block,
+  isSelected,
+  onSrcChange,
+  onDimensionChange,
+}) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onSrcChange(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div
+      className={`relative p-4 transition-all ${
+        isSelected ? "ring-2 ring-valasys-orange" : ""
+      }`}
+      style={{ textAlign: block.alignment as any }}
+    >
+      {block.src ? (
+        <img
+          src={block.src}
+          alt={block.alt}
+          style={{
+            width: `${block.width}${block.widthUnit}`,
+            height: `${block.height}${block.heightUnit}`,
+            display: block.alignment === "center" ? "block" : "inline",
+            margin: block.alignment === "center" ? "0 auto" : "0",
+          }}
+        />
+      ) : (
+        <label className="flex items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+            <p className="text-sm text-gray-500">Click to upload image</p>
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </label>
+      )}
+    </div>
+  );
+};

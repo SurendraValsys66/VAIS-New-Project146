@@ -90,6 +90,7 @@ import { cn } from "@/lib/utils";
 import IntentSignalChart from "@/components/dashboard/IntentSignalChart";
 import QuickAccess from "@/components/dashboard/QuickAccess";
 import { useTour } from "@/contexts/TourContext";
+import { VAISFeedbackModal } from "@/components/ui/vais-feedback-modal";
 
 interface FileUploadState {
   file: File | null;
@@ -438,6 +439,7 @@ export default function ABMLAL() {
     date: string;
     type: string;
   } | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const { startTour } = useTour();
 
@@ -453,7 +455,7 @@ export default function ABMLAL() {
   const [data, setData] = useState<CompanyData[]>(sampleData);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<keyof CompanyData>("vais");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -1478,13 +1480,33 @@ export default function ABMLAL() {
                     {selectedItems.length} Items Selected
                   </Badge>
                 </div>
-                <Button
-                  className="bg-valasys-orange hover:bg-valasys-orange/90"
-                  disabled={selectedItems.length === 0 || isPremiumPage}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Select
+                    value={itemsPerPage.toString()}
+                    onValueChange={(value) => {
+                      setItemsPerPage(parseInt(value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="500">500</SelectItem>
+                      <SelectItem value="1000">1000</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    className="bg-valasys-orange hover:bg-valasys-orange/90"
+                    disabled={selectedItems.length === 0 || isPremiumPage}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className={cn("p-0", isPremiumPage && "blur-sm")}>
@@ -2429,6 +2451,7 @@ export default function ABMLAL() {
                 creditsUsed: 156,
               }}
               onNavigate={(section) => setActiveTab(section)}
+              onFeedback={() => setShowFeedbackModal(true)}
             />
 
             {/* Upload Preview Modal */}
@@ -2908,6 +2931,10 @@ export default function ABMLAL() {
           </div>
         </div>
       </div>
+      <VAISFeedbackModal
+        open={showFeedbackModal}
+        onOpenChange={setShowFeedbackModal}
+      />
     </DashboardLayout>
   );
 }
