@@ -29,6 +29,11 @@ export const ButtonBlockComponent: React.FC<ButtonBlockComponentProps> = ({
         ? "flex-end"
         : "center";
 
+  const buttonWidth =
+    block.widthUnit === "%"
+      ? `${block.width}%`
+      : `${block.width}px`;
+
   return (
     <div
       className={`p-4 transition-all ${
@@ -50,6 +55,8 @@ export const ButtonBlockComponent: React.FC<ButtonBlockComponentProps> = ({
           cursor: "pointer",
           fontSize: "16px",
           fontWeight: "bold",
+          width: buttonWidth,
+          textAlign: "center",
         }}
         title={block.linkTooltip}
         disabled
