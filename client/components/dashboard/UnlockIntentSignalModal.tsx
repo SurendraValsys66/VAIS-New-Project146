@@ -177,10 +177,10 @@ export default function UnlockIntentSignalModal({
               </div>
             </div>
 
-            {/* Info Message */}
-            <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded mb-6">
-              <p className="text-xs text-blue-900">
-                <span className="font-semibold">💡 Tip:</span> Each unlock uses 1 credit per company. You can select multiple options to unlock different signal categories at once.
+            {/* Note Message */}
+            <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded mb-6">
+              <p className="text-sm text-amber-900">
+                <span className="font-semibold">Note:</span> Each unlock intent signal deducts 5 credit.
               </p>
             </div>
 
