@@ -132,63 +132,69 @@ export default function IntentSignalPopover({
         {/* Panel */}
         <div
           className={cn(
-            "absolute right-0 top-0 h-full w-[50%] max-w-2xl bg-white shadow-xl transition-transform duration-300 overflow-auto",
+            "absolute right-0 top-0 h-full w-[50%] max-w-2xl bg-white shadow-2xl transition-transform duration-300 overflow-auto flex flex-col",
             isPanelOpen ? "translate-x-0" : "translate-x-full",
           )}
         >
-          <div className="p-6 space-y-6">
-            {/* Close Button */}
-            <div className="flex justify-end">
-              <button
-                onClick={closePanelClick}
-                className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Company Header */}
-            <div className="border-b pb-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <Building2 className="w-5 h-5 text-valasys-orange" />
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {data.companyName}
-                  </h3>
+          {/* Header with Gradient */}
+          <div className="bg-gradient-to-r from-valasys-orange to-orange-500 text-white sticky top-0 z-10">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start space-x-4 flex-1">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <Building2 className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-1">
+                      <h2 className="text-xl font-bold">{data.companyName}</h2>
+                      <Badge
+                        className={cn(
+                          "text-xs px-2 py-1 font-medium",
+                          getIntentSignalColor(data.intentSignal),
+                        )}
+                      >
+                        {data.intentSignal}
+                      </Badge>
+                    </div>
+                    <p className="text-xs opacity-90">Intent Signal Analysis</p>
+                  </div>
                 </div>
-                <Badge
-                  className={cn(
-                    "text-xs px-3 py-1",
-                    getIntentSignalColor(data.intentSignal),
-                  )}
+                <button
+                  onClick={closePanelClick}
+                  className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
                 >
-                  {data.intentSignal}
-                </Badge>
+                  <X className="w-4 h-4 text-white" />
+                </button>
               </div>
-              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-700">
-                <div className="flex items-center space-x-2">
-                  <Target className="w-4 h-4 text-valasys-orange" />
-                  <span>VAIS:</span>
-                  <span className="font-semibold text-valasys-orange">
-                    {data.vais}%
-                  </span>
+
+              {/* Quick Stats in Header */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                  <div className="text-xs opacity-90 mb-1">VAIS Score</div>
+                  <div className="text-lg font-bold">{data.vais}%</div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-green-600" />
-                  <span>{data.revenue}</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                  <div className="text-xs opacity-90 mb-1">Revenue</div>
+                  <div className="text-sm font-semibold truncate">{data.revenue}</div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span>{data.city}</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
+                  <div className="text-xs opacity-90 mb-1">Location</div>
+                  <div className="text-sm font-semibold">{data.city}</div>
                 </div>
               </div>
             </div>
+          </div>
 
+          {/* Content Area */}
+          <div className="flex-1 overflow-auto p-6 space-y-6">
             {/* Intent Signal Breakdown Chart */}
             <div>
-              <h4 className="text-sm font-semibold mb-4">Intent Signal Breakdown</h4>
+              <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <div className="w-1 h-6 bg-valasys-orange rounded-full"></div>
+                <span>Intent Signal Breakdown</span>
+              </h3>
               <div
-                className="h-64 border rounded-lg p-4 bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                className="h-64 border border-gray-200 rounded-xl p-4 bg-gradient-to-br from-gray-50 to-white cursor-pointer hover:border-valasys-orange hover:shadow-lg transition-all duration-300"
                 onClick={handleChartClick}
               >
                 <ChartContainer config={chartConfig}>
@@ -226,7 +232,7 @@ export default function IntentSignalPopover({
                       type="monotone"
                       dataKey="compositeScore"
                       stroke={chartConfig.compositeScore.color}
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       dot={{
                         fill: chartConfig.compositeScore.color,
                         strokeWidth: 2,
@@ -241,7 +247,7 @@ export default function IntentSignalPopover({
                       type="monotone"
                       dataKey="deltaScore"
                       stroke={chartConfig.deltaScore.color}
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       dot={{
                         fill: chartConfig.deltaScore.color,
                         strokeWidth: 2,
@@ -255,31 +261,49 @@ export default function IntentSignalPopover({
                   </LineChart>
                 </ChartContainer>
               </div>
+              <p className="text-xs text-gray-500 mt-3 text-center hover:text-valasys-orange transition-colors cursor-pointer">
+                Click to view full breakdown →
+              </p>
             </div>
 
             {/* Topics Section */}
-            <div className="border-t pt-4">
-              <h5 className="text-sm font-semibold mb-4">Topics</h5>
-              <div className="space-y-2">
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <div className="w-1 h-6 bg-valasys-orange rounded-full"></div>
+                <span>High Intent Topics</span>
+              </h3>
+              <div className="space-y-3">
                 {data.relatedTopics.slice(0, 3).map((topic, index) => {
                   const scores = [65, 63, 58];
                   const score = scores[index] || Math.floor(Math.random() * 40 + 60);
                   return (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl hover:border-valasys-orange hover:shadow-md transition-all duration-300 group"
                     >
-                      <span className="text-sm text-gray-700 font-medium">{topic}</span>
-                      <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div className="w-2 h-2 bg-valasys-orange rounded-full group-hover:scale-125 transition-transform"></div>
+                        <span className="text-sm text-gray-700 font-medium">{topic}</span>
+                      </div>
+                      <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-200 font-semibold">
                         {score}
                       </Badge>
                     </div>
                   );
                 })}
               </div>
-              <div className="text-xs text-gray-500 mt-3">
-                Showing all topics
-              </div>
+              {data.relatedTopics.length > 3 && (
+                <p className="text-xs text-gray-500 mt-4 text-center">
+                  Showing 3 of {data.relatedTopics.length} topics
+                </p>
+              )}
+            </div>
+
+            {/* Footer Info */}
+            <div className="border-t border-gray-200 pt-4 mt-6">
+              <p className="text-xs text-gray-500 text-center">
+                <span className="text-valasys-orange font-semibold">Tip:</span> Click the chart to view detailed breakdown and trend analysis
+              </p>
             </div>
           </div>
         </div>
