@@ -10,60 +10,15 @@ interface UnlockIntentSignalModalProps {
   currentlyClickedBadgeId?: string;
 }
 
-const unlockOptions = [
-  {
-    id: "current",
-    label: "Unlock Current Signal",
-    description: "This company's intent signal",
-  },
-  {
-    id: "super_strong",
-    label: "Super Strong Signals Only",
-    description: "Companies with super strong intent signals",
-  },
-  {
-    id: "very_strong",
-    label: "Very Strong Signals Only",
-    description: "Companies with very strong intent signals",
-  },
-  {
-    id: "strong",
-    label: "Strong Signals Only",
-    description: "Companies with strong intent signals",
-  },
-  {
-    id: "all",
-    label: "Unlock All Signals",
-    description: "All intent signals in this list",
-  },
-];
-
 export default function UnlockIntentSignalModal({
   open,
   onOpenChange,
   onUnlock,
   currentlyClickedBadgeId,
 }: UnlockIntentSignalModalProps) {
-  const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
-    new Set(["current"]),
-  );
-
-  const handleCheckboxChange = (optionId: string) => {
-    const newSelected = new Set(selectedOptions);
-    if (newSelected.has(optionId)) {
-      newSelected.delete(optionId);
-    } else {
-      newSelected.add(optionId);
-    }
-    setSelectedOptions(newSelected);
-  };
-
   const handleUnlock = () => {
-    if (selectedOptions.size > 0) {
-      onUnlock(Array.from(selectedOptions));
-      onOpenChange(false);
-      setSelectedOptions(new Set(["current"]));
-    }
+    onUnlock(["all"]);
+    onOpenChange(false);
   };
 
   const premiumFeatures = [
