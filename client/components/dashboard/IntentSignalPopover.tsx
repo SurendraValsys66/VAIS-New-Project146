@@ -331,37 +331,69 @@ export default function IntentSignalPopover({
 
               {/* Topics Section */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                  <div className="w-1 h-5 bg-valasys-orange rounded-full"></div>
-                  <span>High Intent Topics</span>
-                </h3>
-                <div className="space-y-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
+                    <div className="w-1 h-6 bg-gradient-to-b from-valasys-orange to-orange-500 rounded-full"></div>
+                    <span>High Intent Topics</span>
+                  </h3>
+                  <span className="text-xs font-semibold text-valasys-orange bg-orange-50 px-2.5 py-1 rounded-full">
+                    Top {Math.min(3, data.relatedTopics.length)}
+                  </span>
+                </div>
+                <div className="space-y-2.5">
                   {data.relatedTopics.slice(0, 3).map((topic, index) => {
                     const scores = [65, 63, 58];
                     const score =
                       scores[index] || Math.floor(Math.random() * 40 + 60);
+                    const growthTrends = ["+24%", "+18%", "+12%"];
+                    const engagementLevels = ["Very High", "High", "High"];
                     return (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-lg hover:border-valasys-orange hover:shadow-md transition-all duration-300 group"
+                        className="p-4 bg-gradient-to-r from-slate-50 to-white border border-gray-200 rounded-xl hover:border-valasys-orange hover:shadow-lg transition-all duration-300 group"
                       >
-                        <div className="flex items-center space-x-3 flex-1">
-                          <div className="w-2 h-2 bg-valasys-orange rounded-full group-hover:scale-125 transition-transform"></div>
-                          <span className="text-sm text-gray-700 font-medium">
-                            {topic}
-                          </span>
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start space-x-3 flex-1">
+                            <div className="w-2 h-2 bg-gradient-to-r from-valasys-orange to-orange-500 rounded-full mt-2 group-hover:scale-150 transition-transform"></div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-semibold text-gray-900">
+                                {topic}
+                              </h4>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                Engagement: <span className="font-semibold text-emerald-600">{engagementLevels[index]}</span>
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-valasys-orange">{score}</div>
+                              <div className="text-xs text-emerald-600 font-semibold">{growthTrends[index]}</div>
+                            </div>
+                          </div>
                         </div>
-                        <Badge className="bg-yellow-100 text-yellow-800 border border-yellow-200 font-semibold text-xs">
-                          {score}
-                        </Badge>
+                        {/* Progress Bar */}
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-valasys-orange to-orange-500 rounded-full transition-all duration-500"
+                              style={{ width: `${score}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-semibold text-gray-600 w-8 text-right">{score}%</span>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
                 {data.relatedTopics.length > 3 && (
-                  <p className="text-xs text-gray-500 mt-3 text-center">
-                    Showing 3 of {data.relatedTopics.length} topics
-                  </p>
+                  <div className="mt-4 p-3 text-center border-t border-gray-200">
+                    <p className="text-xs text-gray-600 font-medium">
+                      Showing 3 of <span className="font-bold text-valasys-orange">{data.relatedTopics.length}</span> high intent topics
+                    </p>
+                    <p className="text-xs text-valasys-orange font-semibold mt-1 cursor-pointer hover:underline">
+                      View all topics →
+                    </p>
+                  </div>
                 )}
               </div>
 
