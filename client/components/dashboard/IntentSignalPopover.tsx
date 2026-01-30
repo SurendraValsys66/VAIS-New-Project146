@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, DollarSign, Target, X, TrendingUp, Zap, Activity, Sparkles } from "lucide-react";
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Target,
+  X,
+  TrendingUp,
+  Zap,
+  Activity,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import IntentSignalModal from "./IntentSignalModal";
 import {
@@ -145,7 +155,9 @@ export default function IntentSignalPopover({
                     <h2 className="text-xl font-bold truncate">
                       {data.companyName}
                     </h2>
-                    <p className="text-sm text-slate-400 mt-0.5">Intent Signal Analysis</p>
+                    <p className="text-sm text-slate-400 mt-0.5">
+                      Intent Signal Analysis
+                    </p>
                   </div>
                 </div>
                 <div className="ml-3 flex items-center space-x-2 flex-shrink-0">
@@ -171,39 +183,51 @@ export default function IntentSignalPopover({
                 {/* VAIS Stat */}
                 <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 backdrop-blur-sm rounded-xl p-3.5 border border-blue-400/30">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">VAIS Score</div>
+                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                      VAIS Score
+                    </div>
                     <div className="flex items-center space-x-1 text-emerald-400">
                       <TrendingUp className="w-3.5 h-3.5" />
                       <span className="text-xs font-semibold">+12%</span>
                     </div>
                   </div>
-                  <div className="text-2xl font-bold text-white">{data.vais}%</div>
+                  <div className="text-2xl font-bold text-white">
+                    {data.vais}%
+                  </div>
                   <p className="text-xs text-slate-400 mt-1">vs. 3 weeks ago</p>
                 </div>
 
                 {/* Revenue Stat */}
                 <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 backdrop-blur-sm rounded-xl p-3.5 border border-emerald-400/30">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Revenue</div>
+                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                      Revenue
+                    </div>
                     <div className="flex items-center space-x-1 text-emerald-400">
                       <Zap className="w-3.5 h-3.5" />
                       <span className="text-xs font-semibold">+8%</span>
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-white truncate">{data.revenue}</div>
+                  <div className="text-lg font-bold text-white truncate">
+                    {data.revenue}
+                  </div>
                   <p className="text-xs text-slate-400 mt-1">ARR Potential</p>
                 </div>
 
                 {/* Location/Momentum Stat */}
                 <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 backdrop-blur-sm rounded-xl p-3.5 border border-purple-400/30">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">Momentum</div>
+                    <div className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                      Momentum
+                    </div>
                     <div className="flex items-center space-x-1 text-yellow-400">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span className="text-xs font-semibold">High</span>
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-white truncate">{data.city}</div>
+                  <div className="text-sm font-bold text-white truncate">
+                    {data.city}
+                  </div>
                   <p className="text-xs text-slate-400 mt-1">Strong Growth</p>
                 </div>
               </div>
@@ -245,13 +269,41 @@ export default function IntentSignalPopover({
                         }}
                       >
                         <defs>
-                          <linearGradient id="colorComposite" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                          <linearGradient
+                            id="colorComposite"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#EF4444"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#EF4444"
+                              stopOpacity={0}
+                            />
                           </linearGradient>
-                          <linearGradient id="colorDelta" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                          <linearGradient
+                            id="colorDelta"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#6366F1"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#6366F1"
+                              stopOpacity={0}
+                            />
                           </linearGradient>
                         </defs>
                         <CartesianGrid
@@ -314,13 +366,21 @@ export default function IntentSignalPopover({
                 <div className="flex items-center justify-between mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                   <div className="flex items-center space-x-4 flex-1">
                     <div>
-                      <p className="text-xs text-gray-600 font-medium">Composite Score</p>
-                      <p className="text-sm font-bold text-gray-900">↑ 42% week-over-week</p>
+                      <p className="text-xs text-gray-600 font-medium">
+                        Composite Score
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        ↑ 42% week-over-week
+                      </p>
                     </div>
                     <div className="w-px h-8 bg-gray-300"></div>
                     <div>
-                      <p className="text-xs text-gray-600 font-medium">Delta Score</p>
-                      <p className="text-sm font-bold text-gray-900">↑ 18% week-over-week</p>
+                      <p className="text-xs text-gray-600 font-medium">
+                        Delta Score
+                      </p>
+                      <p className="text-sm font-bold text-gray-900">
+                        ↑ 18% week-over-week
+                      </p>
                     </div>
                   </div>
                   <p className="text-xs text-valasys-orange font-semibold cursor-pointer hover:underline ml-4">
@@ -373,7 +433,9 @@ export default function IntentSignalPopover({
                     <span className="text-valasys-orange font-bold">
                       💡 Insight:
                     </span>{" "}
-                    This company shows strong intent signals across multiple topics with consistent week-over-week growth. Click the chart for deeper analysis.
+                    This company shows strong intent signals across multiple
+                    topics with consistent week-over-week growth. Click the
+                    chart for deeper analysis.
                   </p>
                 </div>
               </div>
