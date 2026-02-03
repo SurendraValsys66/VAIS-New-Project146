@@ -181,8 +181,10 @@ export default function IntentSignalPopover({
                   {itemId && onAddToList && (
                     <button
                       onClick={() => {
-                        onAddToList(itemId);
-                        setIsAdded(true);
+                        if (!isAdded) {
+                          onAddToList(itemId, true);
+                          setIsAdded(true);
+                        }
                       }}
                       className={cn(
                         "w-9 h-9 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
