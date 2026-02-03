@@ -973,7 +973,7 @@ export default function VAISResults() {
                     onClick={() => markStepCompleted("accountsDownloaded")}
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Download
+                    Download {selectedItems.length > 0 && `(${selectedItems.length})`}
                   </Button>
                 </div>
               </div>
