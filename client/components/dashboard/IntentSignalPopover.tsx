@@ -187,17 +187,23 @@ export default function IntentSignalPopover({
                         }
                       }}
                       className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
+                        "px-3 h-9 rounded-lg flex items-center justify-center gap-2 transition-all flex-shrink-0 text-xs font-medium whitespace-nowrap",
                         isAdded
-                          ? "bg-emerald-600 hover:bg-emerald-700"
-                          : "bg-slate-700 hover:bg-slate-600"
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          : "bg-slate-700 hover:bg-slate-600 text-slate-200"
                       )}
-                      title={isAdded ? "Added to list" : "Add to list"}
+                      title={isAdded ? "Added to download" : "Add to download"}
                     >
                       {isAdded ? (
-                        <Check className="w-4 h-4 text-white" />
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Added</span>
+                        </>
                       ) : (
-                        <Plus className="w-4 h-4 text-slate-300" />
+                        <>
+                          <Download className="w-4 h-4" />
+                          <span>Add to Download</span>
+                        </>
                       )}
                     </button>
                   )}
