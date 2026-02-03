@@ -303,11 +303,21 @@ export default function IntentSignalPopover({
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
                     <div className="w-1 h-6 bg-gradient-to-b from-valasys-orange to-orange-500 rounded-full"></div>
-                    <span>Intent Signal Trend</span>
+                    <span>
+                      {selectedTopic ? `${selectedTopic} Intent Trend` : "Intent Signal Trend"}
+                    </span>
                   </h3>
                   <div className="flex items-center space-x-2 text-xs">
                     <span className="text-gray-500">7-week view</span>
                     <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                    {selectedTopic && (
+                      <button
+                        onClick={() => setSelectedTopic(undefined)}
+                        className="ml-2 px-2 py-1 text-valasys-orange hover:bg-orange-50 rounded transition-colors"
+                      >
+                        ✕ Clear
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div
@@ -366,6 +376,24 @@ export default function IntentSignalPopover({
                               stopOpacity={0}
                             />
                           </linearGradient>
+                          <linearGradient
+                            id="colorScore"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#F59E0B"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#F59E0B"
+                              stopOpacity={0}
+                            />
+                          </linearGradient>
                         </defs>
                         <CartesianGrid
                           strokeDasharray="3 3"
@@ -386,64 +414,99 @@ export default function IntentSignalPopover({
                           tick={{ fill: "#999", fontSize: 12 }}
                         />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                        <Area
-                          type="monotone"
-                          dataKey="compositeScore"
-                          stroke={chartConfig.compositeScore.color}
-                          fillOpacity={1}
-                          fill="url(#colorComposite)"
-                          strokeWidth={2.5}
-                          dot={{
-                            fill: chartConfig.compositeScore.color,
-                            strokeWidth: 2,
-                            r: 4,
-                          }}
-                          activeDot={{
-                            r: 6,
-                          }}
-                          isAnimationActive={true}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="deltaScore"
-                          stroke={chartConfig.deltaScore.color}
-                          fillOpacity={1}
-                          fill="url(#colorDelta)"
-                          strokeWidth={2.5}
-                          dot={{
-                            fill: chartConfig.deltaScore.color,
-                            strokeWidth: 2,
-                            r: 4,
-                          }}
-                          activeDot={{
-                            r: 6,
-                          }}
-                          isAnimationActive={true}
-                        />
+                        {selectedTopic ? (
+                          <Area
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#F59E0B"
+                            fillOpacity={1}
+                            fill="url(#colorScore)"
+                            strokeWidth={2.5}
+                            dot={{
+                              fill: "#F59E0B",
+                              strokeWidth: 2,
+                              r: 4,
+                            }}
+                            activeDot={{
+                              r: 6,
+                            }}
+                            isAnimationActive={true}
+                          />
+                        ) : (
+                          <>
+                            <Area
+                              type="monotone"
+                              dataKey="compositeScore"
+                              stroke={chartConfig.compositeScore.color}
+                              fillOpacity={1}
+                              fill="url(#colorComposite)"
+                              strokeWidth={2.5}
+                              dot={{
+                                fill: chartConfig.compositeScore.color,
+                                strokeWidth: 2,
+                                r: 4,
+                              }}
+                              activeDot={{
+                                r: 6,
+                              }}
+                              isAnimationActive={true}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="deltaScore"
+                              stroke={chartConfig.deltaScore.color}
+                              fillOpacity={1}
+                              fill="url(#colorDelta)"
+                              strokeWidth={2.5}
+                              dot={{
+                                fill: chartConfig.deltaScore.color,
+                                strokeWidth: 2,
+                                r: 4,
+                              }}
+                              activeDot={{
+                                r: 6,
+                              }}
+                              isAnimationActive={true}
+                            />
+                          </>
+                        )}
                       </AreaChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </div>
                 <div className="flex items-center justify-center mt-4">
-                  <div className="flex items-center space-x-4 p-2.5 bg-blue-50 rounded-lg border border-blue-100 w-fit">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-600 font-medium">
-                        Composite Score
-                      </p>
-                      <p className="text-xs font-bold text-gray-900">
-                        ↑ 42% week-over-week
-                      </p>
+                  {selectedTopic ? (
+                    <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-100 w-fit">
+                      <div className="text-center">
+                        <p className="text-xs text-gray-600 font-medium">
+                          {selectedTopic} Intent Score
+                        </p>
+                        <p className="text-xs font-bold text-gray-900">
+                          ↑ 24% week-over-week
+                        </p>
+                      </div>
                     </div>
-                    <div className="w-px h-6 bg-gray-300"></div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-600 font-medium">
-                        Delta Score
-                      </p>
-                      <p className="text-xs font-bold text-gray-900">
-                        ↑ 18% week-over-week
-                      </p>
+                  ) : (
+                    <div className="flex items-center space-x-4 p-2.5 bg-blue-50 rounded-lg border border-blue-100 w-fit">
+                      <div className="text-center">
+                        <p className="text-xs text-gray-600 font-medium">
+                          Composite Score
+                        </p>
+                        <p className="text-xs font-bold text-gray-900">
+                          ↑ 42% week-over-week
+                        </p>
+                      </div>
+                      <div className="w-px h-6 bg-gray-300"></div>
+                      <div className="text-center">
+                        <p className="text-xs text-gray-600 font-medium">
+                          Delta Score
+                        </p>
+                        <p className="text-xs font-bold text-gray-900">
+                          ↑ 18% week-over-week
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
