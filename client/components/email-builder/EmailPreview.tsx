@@ -35,7 +35,14 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ template }) => {
     }
   };
 
-  const htmlContent = template.blocks
+  const filteredBlocks = template.blocks.filter((block) => {
+    if (block.visibility === "all") return true;
+    if (device === "mobile") return block.visibility === "mobile";
+    // Treat tablet as desktop
+    return block.visibility === "desktop";
+  });
+
+  const htmlContent = filteredBlocks
     .map((block) => renderBlockToHTML(block))
     .join("");
 
@@ -118,6 +125,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ template }) => {
 </head>
 <body style="background-color: ${template.backgroundColor}; padding: ${template.padding}px; font-family: Arial, sans-serif;">
   <div style="max-width: 600px; margin: 0 auto;">
+    <!-- Showing blocks for: ${device === "mobile" ? "mobile" : device === "tablet" ? "tablet/desktop" : "desktop"} -->
     ${htmlContent}
   </div>
 </body>

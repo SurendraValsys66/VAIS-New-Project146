@@ -585,15 +585,49 @@ export default function VAISResults() {
     setUnlockModalOpen(true);
   };
 
-  const handleUnlockCurrent = () => {
-    if (currentlyClickedBadgeId) {
-      setUnlockedBadges((prev) => new Set([...prev, currentlyClickedBadgeId]));
-    }
-  };
+  const handleUnlock = (selectedOptions: string[]) => {
+    let badgesToUnlock: Set<string> = new Set();
 
-  const handleUnlockAll = () => {
-    const allBadgeIds = paginatedData.map((item) => item.id);
-    setUnlockedBadges((prev) => new Set([...prev, ...allBadgeIds]));
+    selectedOptions.forEach((selectedOption) => {
+      switch (selectedOption) {
+        case "current":
+          // Unlock only the currently clicked badge
+          if (currentlyClickedBadgeId) {
+            badgesToUnlock.add(currentlyClickedBadgeId);
+          }
+          break;
+
+        case "super_strong":
+          // Unlock only companies with "Super Strong" intent signal
+          paginatedData
+            .filter((item) => item.intentSignal === "Super Strong")
+            .forEach((item) => badgesToUnlock.add(item.id));
+          break;
+
+        case "very_strong":
+          // Unlock companies with "Very Strong" intent signal
+          paginatedData
+            .filter((item) => item.intentSignal === "Very Strong")
+            .forEach((item) => badgesToUnlock.add(item.id));
+          break;
+
+        case "strong":
+          // Unlock companies with "Strong" intent signal
+          paginatedData
+            .filter((item) => item.intentSignal === "Strong")
+            .forEach((item) => badgesToUnlock.add(item.id));
+          break;
+
+        case "all":
+          // Unlock all badges
+          paginatedData.forEach((item) => badgesToUnlock.add(item.id));
+          break;
+      }
+    });
+
+    if (badgesToUnlock.size > 0) {
+      setUnlockedBadges((prev) => new Set([...prev, ...badgesToUnlock]));
+    }
   };
 
   const PremiumOverlay = () => (
@@ -939,7 +973,8 @@ export default function VAISResults() {
                     onClick={() => markStepCompleted("accountsDownloaded")}
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Download
+                    Download{" "}
+                    {selectedItems.length > 0 && `(${selectedItems.length})`}
                   </Button>
                 </div>
               </div>
@@ -1232,6 +1267,8 @@ export default function VAISResults() {
                                   onLockClick={() =>
                                     handleBadgeLockClick(item.id)
                                   }
+                                  itemId={item.id}
+                                  onAddToList={handleSelectItem}
                                 />
                               </TableCell>
                             )}
@@ -1788,8 +1825,8 @@ export default function VAISResults() {
       <UnlockIntentSignalModal
         open={unlockModalOpen}
         onOpenChange={setUnlockModalOpen}
-        onUnlockCurrent={handleUnlockCurrent}
-        onUnlockAll={handleUnlockAll}
+        onUnlock={handleUnlock}
+        currentlyClickedBadgeId={currentlyClickedBadgeId || undefined}
       />
     </DashboardLayout>
   );

@@ -19,22 +19,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import {
   createEmptyTemplate,
   saveTemplateToLocalStorage,
   getTemplatesFromLocalStorage,
   deleteTemplateFromLocalStorage,
   generateId,
+  renderTemplateToHTML,
 } from "./utils";
-import {
-  Save,
-  Download,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  ChevronLeft,
-  Code,
-} from "lucide-react";
+import { Save, Eye, Edit, Trash2, Plus, ChevronLeft, Code } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmailCanvas } from "./EmailCanvas";
 import { SourceCodeView } from "./SourceCodeView";
@@ -215,6 +213,13 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => {
+                    // If viewing source code or preview, close them first
+                    if (showSourceCode || previewMode) {
+                      setShowSourceCode(false);
+                      setPreviewMode(false);
+                      return;
+                    }
+                    // Otherwise, go back to templates list
                     const updated = {
                       ...template,
                       name: templateName,
@@ -246,45 +251,65 @@ export const EmailBuilder: React.FC<EmailBuilderProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPreviewMode(false);
-                  setShowSourceCode(!showSourceCode);
-                }}
-                className={showSourceCode ? "bg-valasys-orange text-white" : ""}
-              >
-                <Code className="w-4 h-4 mr-1" />
-                {showSourceCode ? "Edit" : "View Source"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowSourceCode(false);
-                  setPreviewMode(!previewMode);
-                }}
-                className={previewMode ? "bg-valasys-orange text-white" : ""}
-              >
-                <Eye className="w-4 h-4 mr-1" />
-                {previewMode ? "Edit" : "Preview & test"}
-              </Button>
-              <Button
-                onClick={() => setShowSaveDialog(true)}
-                className="gap-2 bg-valasys-orange hover:bg-valasys-orange/90 text-white"
-              >
-                <Save className="w-4 h-4" />
-                Save & exit
-              </Button>
-            </div>
+            <TooltipProvider>
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPreviewMode(false);
+                        setShowSourceCode(!showSourceCode);
+                      }}
+                      className={
+                        showSourceCode ? "bg-valasys-orange text-white" : ""
+                      }
+                    >
+                      <Code className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="font-medium">
+                    View Source
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowSourceCode(false);
+                        setPreviewMode(!previewMode);
+                      }}
+                      className={
+                        previewMode ? "bg-valasys-orange text-white" : ""
+                      }
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="font-medium">
+                    Preview & test
+                  </TooltipContent>
+                </Tooltip>
+
+                <Button
+                  onClick={() => setShowSaveDialog(true)}
+                  className="gap-2 bg-valasys-orange hover:bg-valasys-orange/90 text-white"
+                >
+                  <Save className="w-4 h-4" />
+                  Save & exit
+                </Button>
+              </div>
+            </TooltipProvider>
           </div>
 
           {/* Main Content */}
           <div className="flex-1 flex overflow-hidden">
             {showSourceCode ? (
-              <div className="flex-1">
+              <div className="flex-1 flex flex-col overflow-hidden">
                 <SourceCodeView template={template} />
               </div>
             ) : previewMode ? (

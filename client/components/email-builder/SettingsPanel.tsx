@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ContentBlock } from "./types";
+import { ContentBlock, HeaderBlock } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, X } from "lucide-react";
 import { SocialLinksEditor } from "./SocialLinksEditor";
 import { FooterSocialLinksEditor } from "./FooterSocialLinksEditor";
+import { generateId } from "./utils";
 
 interface SettingsPanelProps {
   block: ContentBlock | null;
@@ -27,6 +28,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [groupMarginSides, setGroupMarginSides] = useState(false);
   const [applyBorderToAllSides, setApplyBorderToAllSides] = useState(true);
   const [linkType, setLinkType] = useState("url");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedStatId, setSelectedStatId] = useState<string | null>(null);
   const paddingValue =
     "padding" in (block || {}) ? ((block as any).padding ?? 0) : 0;
   const marginValue =
@@ -39,6 +42,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [marginRight, setMarginRight] = useState(marginValue);
   const [marginBottom, setMarginBottom] = useState(marginValue);
   const [marginLeft, setMarginLeft] = useState(marginValue);
+  const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(
+    null,
+  );
+
+  // Initialize selectedCardId when block changes to twoColumnCard
+  React.useEffect(() => {
+    if (block?.type === "twoColumnCard") {
+      const twoColBlock = block as any;
+      setSelectedCardId(twoColBlock.cards?.[0]?.id || null);
+    } else if (block?.type === "stats") {
+      const statsBlock = block as any;
+      setSelectedStatId(statsBlock.stats?.[0]?.id || null);
+    } else if (block?.type === "features") {
+      const featuresBlock = block as any;
+      setSelectedFeatureId(featuresBlock.features?.[0]?.id || null);
+    }
+  }, [block?.id, block?.type]);
 
   if (!block) {
     return (
@@ -2077,8 +2097,23 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="text-xs text-gray-700">Margin</Label>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="btnGroupMargin"
+                        checked={groupMarginSides}
+                        onCheckedChange={(checked) =>
+                          setGroupMarginSides(checked as boolean)
+                        }
+                      />
+                      <Label
+                        htmlFor="btnGroupMargin"
+                        className="text-xs text-gray-600 cursor-pointer"
+                      >
+                        Group sides
+                      </Label>
+                    </div>
                   </div>
-                  {!groupMarginSides ? (
+                  {groupMarginSides ? (
                     <div className="flex gap-2">
                       <Input
                         type="number"
@@ -2347,33 +2382,253 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
           </div>
         );
-      case "header":
+      case "header": {
+        const headerBlock = block as HeaderBlock;
         return (
           <div className="space-y-4">
+            {/* Logo Upload */}
+            <div>
+              <Label>Logo</Label>
+              {headerBlock.logo && (
+                <div className="mb-2 flex items-center gap-2">
+                  <img
+                    src={headerBlock.logo}
+                    alt="Logo"
+                    className="max-h-12 max-w-12"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onBlockUpdate({ ...headerBlock, logo: "" })}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      onBlockUpdate({
+                        ...headerBlock,
+                        logo: event.target?.result as string,
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              />
+            </div>
+
+            {/* Logo Dimensions */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="logoWidth">Logo Width (px)</Label>
+                <Input
+                  id="logoWidth"
+                  type="number"
+                  value={headerBlock.logoWidth}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      logoWidth: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="logoHeight">Logo Height (px)</Label>
+                <Input
+                  id="logoHeight"
+                  type="number"
+                  value={headerBlock.logoHeight}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      logoHeight: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Company Name */}
+            <div>
+              <Label htmlFor="companyName">Company Name</Label>
+              <Input
+                id="companyName"
+                type="text"
+                value={headerBlock.companyName}
+                onChange={(e) =>
+                  onBlockUpdate({ ...headerBlock, companyName: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Company Name Styling */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="companyFontSize">Name Font Size (px)</Label>
+                <Input
+                  id="companyFontSize"
+                  type="number"
+                  value={headerBlock.companyFontSize}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      companyFontSize: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="companyFontColor">Name Color</Label>
+                <Input
+                  id="companyFontColor"
+                  type="color"
+                  value={headerBlock.companyFontColor}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      companyFontColor: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <Label>Links</Label>
+              <div className="space-y-2">
+                {headerBlock.links.map((link, index) => (
+                  <div key={link.id} className="flex gap-1">
+                    <Input
+                      type="text"
+                      placeholder="Link text"
+                      value={link.text}
+                      onChange={(e) => {
+                        const newLinks = [...headerBlock.links];
+                        newLinks[index].text = e.target.value;
+                        onBlockUpdate({ ...headerBlock, links: newLinks });
+                      }}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="URL"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...headerBlock.links];
+                        newLinks[index].url = e.target.value;
+                        onBlockUpdate({ ...headerBlock, links: newLinks });
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newLinks = headerBlock.links.filter(
+                          (_, i) => i !== index,
+                        );
+                        onBlockUpdate({ ...headerBlock, links: newLinks });
+                      }}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    onBlockUpdate({
+                      ...headerBlock,
+                      links: [
+                        ...headerBlock.links,
+                        { id: generateId(), text: "", url: "" },
+                      ],
+                    });
+                  }}
+                >
+                  + Add Link
+                </Button>
+              </div>
+            </div>
+
+            {/* Links Styling */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="linksFontSize">Links Font Size (px)</Label>
+                <Input
+                  id="linksFontSize"
+                  type="number"
+                  value={headerBlock.linksFontSize}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      linksFontSize: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="linksFontColor">Links Color</Label>
+                <Input
+                  id="linksFontColor"
+                  type="color"
+                  value={headerBlock.linksFontColor}
+                  onChange={(e) =>
+                    onBlockUpdate({
+                      ...headerBlock,
+                      linksFontColor: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Background Color */}
             <div>
               <Label htmlFor="headerBgColor">Background Color</Label>
               <Input
                 id="headerBgColor"
                 type="color"
-                value={block.backgroundColor}
+                value={headerBlock.backgroundColor}
                 onChange={(e) =>
-                  onBlockUpdate({ ...block, backgroundColor: e.target.value })
+                  onBlockUpdate({
+                    ...headerBlock,
+                    backgroundColor: e.target.value,
+                  })
                 }
               />
             </div>
+
+            {/* Padding */}
             <div>
               <Label htmlFor="headerPadding">Padding (px)</Label>
               <Input
                 id="headerPadding"
                 type="number"
-                value={block.padding}
+                value={headerBlock.padding}
                 onChange={(e) =>
-                  onBlockUpdate({ ...block, padding: parseInt(e.target.value) })
+                  onBlockUpdate({
+                    ...headerBlock,
+                    padding: parseInt(e.target.value),
+                  })
                 }
               />
             </div>
           </div>
         );
+      }
       case "footer":
         return (
           <div className="space-y-4">
@@ -5040,14 +5295,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         );
       case "twoColumnCard": {
         const twoColBlock = block as any;
-        const [selectedCardId, setSelectedCardId] = React.useState<
-          string | null
-        >(twoColBlock.cards?.[0]?.id || null);
         const selectedCard = twoColBlock.cards?.find(
           (card: any) => card.id === selectedCardId,
         );
 
-        const handleCardUpdate = (fieldName: string, value: string) => {
+        const handleCardUpdate = (fieldName: string, value: any) => {
           if (!selectedCard) return;
           const updatedCards = twoColBlock.cards.map((card: any) =>
             card.id === selectedCardId ? { ...card, [fieldName]: value } : card,
@@ -5114,137 +5366,584 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange focus:border-transparent"
                   />
                 </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 mb-3">
+                    Styling
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-2 block">
+                        Background Color
+                      </Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={selectedCard.backgroundColor}
+                          onChange={(e) =>
+                            handleCardUpdate("backgroundColor", e.target.value)
+                          }
+                          className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <Input
+                          value={selectedCard.backgroundColor}
+                          onChange={(e) =>
+                            handleCardUpdate("backgroundColor", e.target.value)
+                          }
+                          placeholder="#333333"
+                          className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-2 block">
+                        Text Color
+                      </Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={selectedCard.textColor}
+                          onChange={(e) =>
+                            handleCardUpdate("textColor", e.target.value)
+                          }
+                          className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <Input
+                          value={selectedCard.textColor}
+                          onChange={(e) =>
+                            handleCardUpdate("textColor", e.target.value)
+                          }
+                          placeholder="#ffffff"
+                          className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Border Radius
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="50"
+                          value={selectedCard.borderRadius}
+                          onChange={(e) =>
+                            handleCardUpdate(
+                              "borderRadius",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Padding
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={selectedCard.padding}
+                          onChange={(e) =>
+                            handleCardUpdate(
+                              "padding",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Margin
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={selectedCard.margin}
+                          onChange={(e) =>
+                            handleCardUpdate("margin", parseInt(e.target.value))
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
+          </div>
+        );
+      }
+      case "stats": {
+        const statsBlock = block as any;
+        const selectedStat = statsBlock.stats?.find(
+          (stat: any) => stat.id === selectedStatId,
+        );
 
+        const handleStatUpdate = (fieldName: string, value: any) => {
+          if (!selectedStat) return;
+          const updatedStats = statsBlock.stats.map((stat: any) =>
+            stat.id === selectedStatId ? { ...stat, [fieldName]: value } : stat,
+          );
+          onBlockUpdate({ ...statsBlock, stats: updatedStats });
+        };
+
+        return (
+          <div className="space-y-5">
             <div>
-              <h4 className="text-xs font-bold text-gray-900 mb-3">Styling</h4>
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-gray-700 mb-2 block">
-                    Background Color
-                  </Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={twoColBlock.backgroundColor}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          backgroundColor: e.target.value,
-                        })
-                      }
-                      className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-                    />
-                    <Input
-                      value={twoColBlock.backgroundColor}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          backgroundColor: e.target.value,
-                        })
-                      }
-                      placeholder="#333333"
-                      className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-gray-700 mb-2 block">
-                    Text Color
-                  </Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={twoColBlock.textColor}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          textColor: e.target.value,
-                        })
-                      }
-                      className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-                    />
-                    <Input
-                      value={twoColBlock.textColor}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          textColor: e.target.value,
-                        })
-                      }
-                      placeholder="#ffffff"
-                      className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-gray-700 mb-1 block">
-                    Border Radius
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="50"
-                      value={twoColBlock.borderRadius}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          borderRadius: parseInt(e.target.value),
-                        })
-                      }
-                      className="flex-1 focus:ring-valasys-orange focus:ring-2"
-                    />
-                    <span className="px-2 py-1 text-sm text-gray-600">px</span>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-gray-700 mb-1 block">
-                    Padding
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      value={twoColBlock.padding}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          padding: parseInt(e.target.value),
-                        })
-                      }
-                      className="flex-1 focus:ring-valasys-orange focus:ring-2"
-                    />
-                    <span className="px-2 py-1 text-sm text-gray-600">px</span>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-gray-700 mb-1 block">
-                    Margin
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      value={twoColBlock.margin}
-                      onChange={(e) =>
-                        onBlockUpdate({
-                          ...twoColBlock,
-                          margin: parseInt(e.target.value),
-                        })
-                      }
-                      className="flex-1 focus:ring-valasys-orange focus:ring-2"
-                    />
-                    <span className="px-2 py-1 text-sm text-gray-600">px</span>
-                  </div>
-                </div>
+              <Label className="text-xs font-semibold text-gray-700 mb-2 block">
+                Select Stat to Edit
+              </Label>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {statsBlock.stats?.map((stat: any, index: number) => (
+                  <button
+                    key={stat.id}
+                    onClick={() => setSelectedStatId(stat.id)}
+                    className={`px-3 py-2 rounded text-xs font-medium transition-all ${
+                      selectedStatId === stat.id
+                        ? "bg-valasys-orange text-white ring-2 ring-orange-300"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Stat {index + 1}
+                  </button>
+                ))}
               </div>
             </div>
+
+            {selectedStat && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="statValue"
+                    className="text-xs font-semibold text-gray-700 mb-2 block"
+                  >
+                    Value
+                  </Label>
+                  <Input
+                    id="statValue"
+                    value={selectedStat.value}
+                    onChange={(e) => handleStatUpdate("value", e.target.value)}
+                    placeholder="e.g., 4.8"
+                    className="focus:ring-valasys-orange focus:ring-2"
+                  />
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="statLabel"
+                    className="text-xs font-semibold text-gray-700 mb-2 block"
+                  >
+                    Label
+                  </Label>
+                  <Input
+                    id="statLabel"
+                    value={selectedStat.label}
+                    onChange={(e) => handleStatUpdate("label", e.target.value)}
+                    placeholder="e.g., Average rating"
+                    className="focus:ring-valasys-orange focus:ring-2"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 mb-3">
+                    Styling
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Value Font Size
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="12"
+                          max="72"
+                          value={selectedStat.fontSize}
+                          onChange={(e) =>
+                            handleStatUpdate(
+                              "fontSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Label Font Size
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="10"
+                          max="32"
+                          value={selectedStat.labelFontSize}
+                          onChange={(e) =>
+                            handleStatUpdate(
+                              "labelFontSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-2 block">
+                        Text Color
+                      </Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={selectedStat.textColor}
+                          onChange={(e) =>
+                            handleStatUpdate("textColor", e.target.value)
+                          }
+                          className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <Input
+                          value={selectedStat.textColor}
+                          onChange={(e) =>
+                            handleStatUpdate("textColor", e.target.value)
+                          }
+                          placeholder="#000000"
+                          className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Padding
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={selectedStat.padding}
+                          onChange={(e) =>
+                            handleStatUpdate(
+                              "padding",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        );
+      }
+      case "features": {
+        const featuresBlock = block as any;
+        const selectedFeature = featuresBlock.features?.find(
+          (feature: any) => feature.id === selectedFeatureId,
+        );
+
+        const handleFeatureUpdate = (fieldName: string, value: any) => {
+          if (!selectedFeature) return;
+          const updatedFeatures = featuresBlock.features.map((feature: any) =>
+            feature.id === selectedFeatureId
+              ? { ...feature, [fieldName]: value }
+              : feature,
+          );
+          onBlockUpdate({ ...featuresBlock, features: updatedFeatures });
+        };
+
+        return (
+          <div className="space-y-5">
+            <div>
+              <Label className="text-xs font-semibold text-gray-700 mb-2 block">
+                Select Feature to Edit
+              </Label>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {featuresBlock.features?.map((feature: any, index: number) => (
+                  <button
+                    key={feature.id}
+                    onClick={() => setSelectedFeatureId(feature.id)}
+                    className={`px-3 py-2 rounded text-xs font-medium transition-all ${
+                      selectedFeatureId === feature.id
+                        ? "bg-valasys-orange text-white ring-2 ring-orange-300"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Feature {index + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-gray-700 mb-2 block">
+                Columns Count
+              </Label>
+              <select
+                value={featuresBlock.columnsCount}
+                onChange={(e) =>
+                  onBlockUpdate({
+                    ...featuresBlock,
+                    columnsCount: parseInt(e.target.value),
+                  })
+                }
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange focus:border-transparent"
+              >
+                <option value="1">1 Column</option>
+                <option value="2">2 Columns</option>
+                <option value="3">3 Columns</option>
+                <option value="4">4 Columns</option>
+              </select>
+            </div>
+
+            {selectedFeature && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="featureIcon"
+                    className="text-xs font-semibold text-gray-700 mb-2 block"
+                  >
+                    Icon/Emoji
+                  </Label>
+                  <Input
+                    id="featureIcon"
+                    value={selectedFeature.icon}
+                    onChange={(e) =>
+                      handleFeatureUpdate("icon", e.target.value)
+                    }
+                    placeholder="e.g., ❤️"
+                    className="focus:ring-valasys-orange focus:ring-2"
+                  />
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="featureTitle"
+                    className="text-xs font-semibold text-gray-700 mb-2 block"
+                  >
+                    Title
+                  </Label>
+                  <Input
+                    id="featureTitle"
+                    value={selectedFeature.title}
+                    onChange={(e) =>
+                      handleFeatureUpdate("title", e.target.value)
+                    }
+                    placeholder="e.g., Feature One"
+                    className="focus:ring-valasys-orange focus:ring-2"
+                  />
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="featureDescription"
+                    className="text-xs font-semibold text-gray-700 mb-2 block"
+                  >
+                    Description
+                  </Label>
+                  <textarea
+                    id="featureDescription"
+                    value={selectedFeature.description}
+                    onChange={(e) =>
+                      handleFeatureUpdate("description", e.target.value)
+                    }
+                    placeholder="Feature description..."
+                    rows={3}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-valasys-orange focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 mb-3">
+                    Styling
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Title Font Size
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="12"
+                          max="72"
+                          value={selectedFeature.titleFontSize}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "titleFontSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Description Font Size
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="10"
+                          max="32"
+                          value={selectedFeature.fontSize}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "fontSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-2 block">
+                        Text Color
+                      </Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={selectedFeature.textColor}
+                          onChange={(e) =>
+                            handleFeatureUpdate("textColor", e.target.value)
+                          }
+                          className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <Input
+                          value={selectedFeature.textColor}
+                          onChange={(e) =>
+                            handleFeatureUpdate("textColor", e.target.value)
+                          }
+                          placeholder="#000000"
+                          className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-2 block">
+                        Background Color
+                      </Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={selectedFeature.backgroundColor}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "backgroundColor",
+                              e.target.value,
+                            )
+                          }
+                          className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+                        />
+                        <Input
+                          value={selectedFeature.backgroundColor}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "backgroundColor",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="#ffffff"
+                          className="flex-1 text-xs focus:ring-valasys-orange focus:ring-2"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Border Radius
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="50"
+                          value={selectedFeature.borderRadius}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "borderRadius",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-gray-700 mb-1 block">
+                        Padding
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={selectedFeature.padding}
+                          onChange={(e) =>
+                            handleFeatureUpdate(
+                              "padding",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="flex-1 focus:ring-valasys-orange focus:ring-2"
+                        />
+                        <span className="px-2 py-1 text-sm text-gray-600">
+                          px
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         );
       }

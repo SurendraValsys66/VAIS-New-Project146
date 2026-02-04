@@ -53,15 +53,11 @@ interface IntentSignalModalProps {
 const chartConfig = {
   compositeScore: {
     label: "Composite Score",
-    color: "hsl(220, 70%, 50%)",
+    color: "#EF4444", // Red/Orange color
   },
   deltaScore: {
     label: "Delta Score",
-    color: "hsl(120, 60%, 50%)",
-  },
-  matchedTopics: {
-    label: "Matched Topics",
-    color: "hsl(280, 70%, 55%)",
+    color: "#6366F1", // Indigo/Blue color
   },
 };
 
@@ -69,24 +65,17 @@ const generateChartData = (intentData: IntentSignalData) => {
   const baseData = [];
   const compositeBase = intentData.compositeScore;
   const deltaBase = intentData.deltaScore;
-  const topicsBase = intentData.matchedTopics;
 
-  for (let i = 0; i < 12; i++) {
-    const variation = (Math.random() - 0.5) * 0.15;
+  // Generate 7 weeks of data
+  for (let i = 0; i < 7; i++) {
+    const variation = (i / 6) * 0.6; // Progressive increase from week 1 to week 7
     baseData.push({
-      month: `Month ${i + 1}`,
+      week: `week${i + 1}`,
       compositeScore: Math.max(
         0,
-        Math.round(compositeBase + compositeBase * variation),
+        Math.round(compositeBase * (0.2 + variation)),
       ),
-      deltaScore: Math.max(
-        0,
-        Math.round(deltaBase + deltaBase * variation * 100) / 100,
-      ),
-      matchedTopics: Math.max(
-        0,
-        Math.round(topicsBase + topicsBase * variation),
-      ),
+      deltaScore: Math.max(0, Math.round(deltaBase * (0.2 + variation))),
     });
   }
   return baseData;
@@ -214,190 +203,147 @@ export default function IntentSignalModal({
             </Button>
           </div>
         ) : (
-          <div className="space-y-4 py-6">
+          <div className="space-y-6 py-6">
             {/* Unlocked Content */}
 
             {/* Company Header */}
-            <div className="border-b pb-3">
-              <div className="flex items-center justify-between mb-2">
+            <div className="border-b pb-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
-                  <Building2 className="w-4 h-4 text-valasys-orange" />
-                  <h3 className="text-lg font-bold text-valasys-gray-900">
+                  <Building2 className="w-5 h-5 text-valasys-orange" />
+                  <h3 className="text-lg font-bold text-gray-900">
                     {data.companyName}
                   </h3>
                 </div>
                 <Badge
                   className={cn(
-                    "text-xs",
+                    "text-xs px-3 py-1",
                     getIntentSignalColor(data.intentSignal),
+                    data.intentSignal === "Super Strong" &&
+                      "animate-badge-popup",
                   )}
                 >
                   {data.intentSignal}
                 </Badge>
               </div>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-valasys-gray-600">
-                <div className="flex items-center space-x-1">
-                  <Target className="w-3 h-3 text-valasys-orange" />
-                  <span>
-                    VAIS:{" "}
-                    <span className="font-semibold text-valasys-orange">
-                      {data.vais.toFixed(1)}
-                    </span>
+              <div className="flex flex-wrap items-center gap-6 text-sm text-gray-700">
+                <div className="flex items-center space-x-2">
+                  <Target className="w-4 h-4 text-valasys-orange" />
+                  <span>VAIS:</span>
+                  <span className="font-semibold text-valasys-orange">
+                    {data.vais}%
                   </span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <DollarSign className="w-3 h-3 text-green-600" />
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="w-4 h-4 text-green-600" />
                   <span>{data.revenue}</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <MapPin className="w-3 h-3 text-blue-600" />
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
                   <span>{data.city}</span>
                 </div>
               </div>
             </div>
 
+            {/* Intent Signal Breakdown Chart */}
             <div>
-              <h4 className="text-sm font-semibold mb-3">Current Metrics</h4>
-
-              {/* Current Metrics */}
-              <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
-                  <div className="text-blue-600 font-medium">
-                    Composite Score
-                  </div>
-                  <div className="text-xl font-bold text-blue-800">
-                    {data.compositeScore}
-                  </div>
-                  <div className="text-blue-500 text-xs">Base metric</div>
-                </div>
-                <div className="bg-green-50 p-3 rounded-md border border-green-200">
-                  <div className="text-green-600 font-medium">Delta Score</div>
-                  <div className="text-xl font-bold text-green-800">
-                    {data.deltaScore.toFixed(1)}
-                  </div>
-                  <div className="text-green-500 text-xs">Change rate</div>
-                </div>
-                <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
-                  <div className="text-yellow-600 font-medium">Topics</div>
-                  <div className="text-xl font-bold text-yellow-800">
-                    {data.matchedTopics}
-                  </div>
-                  <div className="text-yellow-500 text-xs">Matched count</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Spline Chart */}
-            <div>
-              <h4 className="text-sm font-semibold mb-3">Trend Analysis</h4>
-              <div className="h-48 border rounded-lg p-3 bg-white">
+              <h4 className="text-sm font-semibold mb-4">
+                Intent Signal Breakdown
+              </h4>
+              <div className="h-64 border rounded-lg p-4 bg-white">
                 <ChartContainer config={chartConfig}>
                   <LineChart
                     data={chartData}
                     margin={{
-                      top: 10,
-                      right: 10,
-                      left: 10,
-                      bottom: 0,
+                      top: 5,
+                      right: 30,
+                      left: -20,
+                      bottom: 5,
                     }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      className="opacity-30"
+                      className="opacity-20"
+                      vertical={false}
                     />
                     <XAxis
-                      dataKey="month"
-                      fontSize={10}
+                      dataKey="week"
+                      fontSize={12}
                       tickLine={false}
                       axisLine={false}
-                      interval="preserveStartEnd"
+                      tick={{ fill: "#666" }}
                     />
-                    <YAxis hide />
+                    <YAxis
+                      hide={false}
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: "#999" }}
+                      width={30}
+                    />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line
                       type="monotone"
                       dataKey="compositeScore"
                       stroke={chartConfig.compositeScore.color}
-                      strokeWidth={3}
+                      strokeWidth={2}
                       dot={{
                         fill: chartConfig.compositeScore.color,
                         strokeWidth: 2,
-                        r: 4,
+                        r: 5,
                       }}
                       activeDot={{
-                        r: 6,
-                        stroke: chartConfig.compositeScore.color,
-                        strokeWidth: 2,
+                        r: 7,
                       }}
+                      isAnimationActive={true}
                     />
                     <Line
                       type="monotone"
                       dataKey="deltaScore"
                       stroke={chartConfig.deltaScore.color}
-                      strokeWidth={3}
+                      strokeWidth={2}
                       dot={{
                         fill: chartConfig.deltaScore.color,
                         strokeWidth: 2,
-                        r: 4,
+                        r: 5,
                       }}
                       activeDot={{
-                        r: 6,
-                        stroke: chartConfig.deltaScore.color,
-                        strokeWidth: 2,
+                        r: 7,
                       }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="matchedTopics"
-                      stroke={chartConfig.matchedTopics.color}
-                      strokeWidth={3}
-                      dot={{
-                        fill: chartConfig.matchedTopics.color,
-                        strokeWidth: 2,
-                        r: 4,
-                      }}
-                      activeDot={{
-                        r: 6,
-                        stroke: chartConfig.matchedTopics.color,
-                        strokeWidth: 2,
-                      }}
+                      isAnimationActive={true}
                     />
                   </LineChart>
                 </ChartContainer>
               </div>
             </div>
 
-            {/* Related High Intent Topics */}
-            <div className="border-t pt-3">
-              <h5 className="text-sm font-semibold mb-3">
-                Other High Intent Topics
-              </h5>
-              <div className="grid grid-cols-1 gap-2">
-                {data.relatedTopics.map((topic, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="text-xs text-gray-700">{topic}</span>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-valasys-orange rounded-full"></div>
-                      <span className="text-xs text-valasys-orange font-medium">
-                        High
+            {/* Topics Section */}
+            <div>
+              <h5 className="text-sm font-semibold mb-4">Topics</h5>
+              <div className="space-y-2">
+                {data.relatedTopics.slice(0, 3).map((topic, index) => {
+                  // Generate random scores for each topic (can be modified to use actual data)
+                  const scores = [65, 63, 58];
+                  const score =
+                    scores[index] || Math.floor(Math.random() * 40 + 60);
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="text-sm text-gray-700 font-medium">
+                        {topic}
                       </span>
+                      <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                        {score}
+                      </Badge>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            </div>
-
-            <div className="text-xs text-gray-500 border-t pt-3">
-              <p className="flex items-center space-x-2">
-                <span>📈</span>
-                <span>
-                  Spline chart analysis showing composite score, delta score,
-                  and matched topics trends over 12 months
-                </span>
-              </p>
+              <div className="text-xs text-gray-500 mt-3">
+                Showing all topics
+              </div>
             </div>
           </div>
         )}

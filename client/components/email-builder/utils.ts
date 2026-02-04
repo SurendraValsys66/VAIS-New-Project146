@@ -281,9 +281,27 @@ export function createHeaderBlock(logo = ""): HeaderBlock {
     type: "header",
     id: generateId(),
     logo,
+    logoAlt: "Company Logo",
+    logoWidth: 40,
+    logoHeight: 40,
+    companyName: "Your Company",
+    companyFontSize: 18,
+    companyFontColor: "#000000",
+    companyFontWeight: "bold",
+    links: [
+      { id: generateId(), text: "Sign in", url: "#" },
+      { id: generateId(), text: "View Online", url: "#" },
+    ],
+    linksFontSize: 14,
+    linksFontColor: "#666666",
     backgroundColor: "#ffffff",
     padding: 20,
+    margin: 0,
+    borderWidth: 0,
+    borderColor: "#cccccc",
+    borderRadius: 0,
     alignment: "center",
+    visibility: "all",
   };
 }
 
@@ -531,33 +549,34 @@ export function createFooterWithContactTemplate(): ContentBlock[] {
   return [createHtmlBlock(footerContent)];
 }
 
-export function createTwoColumnCardBlock(): HtmlBlock {
+export function createTwoColumnCardBlock() {
   return {
-    type: "html",
+    type: "twoColumnCard",
     id: generateId(),
-    content: `<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
-      <tr>
-        <td width="48%" style="vertical-align: top; padding-right: 10px;">
-          <div style="background-color: #333333; color: #ffffff; padding: 24px; border-radius: 8px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: bold;">Some title here</h3>
-            <p style="margin: 0; font-size: 14px; line-height: 1.5;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-          </div>
-        </td>
-        <td width="48%" style="vertical-align: top; padding-left: 10px;">
-          <div style="background-color: #333333; color: #ffffff; padding: 24px; border-radius: 8px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: bold;">Some title here</h3>
-            <p style="margin: 0; font-size: 14px; line-height: 1.5;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-          </div>
-        </td>
-      </tr>
-    </table>`,
+    cards: [
+      {
+        id: generateId(),
+        title: "Card Title",
+        description: "Add your card description here",
+        backgroundColor: "#333333",
+        textColor: "#ffffff",
+        borderRadius: 8,
+        padding: 24,
+        margin: 10,
+      },
+      {
+        id: generateId(),
+        title: "Card Title",
+        description: "Add your card description here",
+        backgroundColor: "#333333",
+        textColor: "#ffffff",
+        borderRadius: 8,
+        padding: 24,
+        margin: 10,
+      },
+    ],
     width: 100,
     widthUnit: "%",
-    padding: 0,
-    margin: 0,
-    borderWidth: 0,
-    borderColor: "#000000",
-    borderRadius: 0,
     visibility: "all",
   };
 }
@@ -581,68 +600,91 @@ export function createPromoBlock(): HtmlBlock {
   };
 }
 
-export function createStatsBlock(): HtmlBlock {
+export function createStatsBlock() {
   return {
-    type: "html",
+    type: "stats",
     id: generateId(),
-    content: `<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
-      <tr>
-        <td width="33%" style="text-align: center; padding: 20px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #000;">4.8</h3>
-          <p style="margin: 0; font-size: 14px; color: #666;">Average rating</p>
-        </td>
-        <td width="33%" style="text-align: center; padding: 20px; border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">
-          <h3 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #000;">120</h3>
-          <p style="margin: 0; font-size: 14px; color: #666;">Reviews</p>
-        </td>
-        <td width="33%" style="text-align: center; padding: 20px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #000;">200K</h3>
-          <p style="margin: 0; font-size: 14px; color: #666;">Downloads</p>
-        </td>
-      </tr>
-    </table>`,
+    stats: [
+      {
+        id: generateId(),
+        value: "4.8",
+        label: "Average rating",
+        fontSize: 28,
+        labelFontSize: 14,
+        textColor: "#000000",
+        padding: 20,
+      },
+      {
+        id: generateId(),
+        value: "120",
+        label: "Reviews",
+        fontSize: 28,
+        labelFontSize: 14,
+        textColor: "#000000",
+        padding: 20,
+      },
+      {
+        id: generateId(),
+        value: "200K",
+        label: "Downloads",
+        fontSize: 28,
+        labelFontSize: 14,
+        textColor: "#000000",
+        padding: 20,
+      },
+    ],
     width: 100,
     widthUnit: "%",
-    padding: 0,
-    margin: 0,
-    borderWidth: 0,
-    borderColor: "#000000",
-    borderRadius: 0,
     visibility: "all",
   };
 }
 
-export function createFeaturesBlock(): HtmlBlock {
+export function createFeaturesBlock() {
   return {
-    type: "html",
+    type: "features" as const,
     id: generateId(),
-    content: `<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
-      <tr>
-        <td width="33%" style="text-align: center; padding: 20px;">
-          <div style="font-size: 32px; margin-bottom: 12px;">❤️</div>
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #000;">Some title here</h3>
-          <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.5;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        </td>
-        <td width="33%" style="text-align: center; padding: 20px;">
-          <div style="font-size: 32px; margin-bottom: 12px;">🎁</div>
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #000;">Some title here</h3>
-          <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.5;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        </td>
-        <td width="33%" style="text-align: center; padding: 20px;">
-          <div style="font-size: 32px; margin-bottom: 12px;">ℹ️</div>
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #000;">Some title here</h3>
-          <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.5;">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        </td>
-      </tr>
-    </table>`,
+    features: [
+      {
+        id: generateId(),
+        icon: "❤️",
+        title: "Feature One",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        fontSize: 14,
+        titleFontSize: 16,
+        textColor: "#000000",
+        backgroundColor: "#ffffff",
+        padding: 20,
+        borderRadius: 8,
+      },
+      {
+        id: generateId(),
+        icon: "🎁",
+        title: "Feature Two",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        fontSize: 14,
+        titleFontSize: 16,
+        textColor: "#000000",
+        backgroundColor: "#ffffff",
+        padding: 20,
+        borderRadius: 8,
+      },
+      {
+        id: generateId(),
+        icon: "ℹ️",
+        title: "Feature Three",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        fontSize: 14,
+        titleFontSize: 16,
+        textColor: "#000000",
+        backgroundColor: "#ffffff",
+        padding: 20,
+        borderRadius: 8,
+      },
+    ],
     width: 100,
     widthUnit: "%",
-    padding: 0,
-    margin: 0,
-    borderWidth: 0,
-    borderColor: "#000000",
-    borderRadius: 0,
-    visibility: "all",
+    columnsCount: 3,
+    visibility: "all" as const,
   };
 }
 
@@ -858,6 +900,55 @@ export function renderBlockToHTML(block: ContentBlock): string {
       const compiled = compileHTML(sanitized);
       return `<div style="width: ${htmlBlock.width}${htmlBlock.widthUnit}; padding: ${htmlBlock.padding}px; margin: ${htmlBlock.margin}px;">${compiled}</div>`;
     }
+    case "twoColumnCard": {
+      const twoColBlock = block as any;
+      const width = `${twoColBlock.width}${twoColBlock.widthUnit}`;
+      const cardsHtml = twoColBlock.cards
+        ?.map(
+          (card: any) =>
+            `<div style="width: 48%; display: inline-block; vertical-align: top; padding-right: 10px; box-sizing: border-box;">
+              <div style="background-color: ${card.backgroundColor}; color: ${card.textColor}; padding: ${card.padding}px; border-radius: ${card.borderRadius}px; margin: ${card.margin}px;">
+                <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: bold;">${card.title}</h3>
+                <p style="margin: 0; font-size: 14px; line-height: 1.5;">${card.description}</p>
+              </div>
+            </div>`,
+        )
+        .join("");
+      return `<div style="width: ${width};"><div style="display: flex; gap: 20px;">${cardsHtml}</div></div>`;
+    }
+    case "stats": {
+      const statsBlock = block as any;
+      const width = `${statsBlock.width}${statsBlock.widthUnit}`;
+      const statsHtml = statsBlock.stats
+        ?.map((stat: any, index: number) => {
+          const borderStyle =
+            index !== statsBlock.stats.length - 1
+              ? "border-right: 1px solid #e0e0e0;"
+              : "";
+          return `<div style="width: 33%; display: inline-block; vertical-align: top; text-align: center; padding: ${stat.padding}px; box-sizing: border-box; ${borderStyle}">
+              <h3 style="margin: 0 0 8px 0; font-size: ${stat.fontSize}px; font-weight: bold; color: ${stat.textColor};">${stat.value}</h3>
+              <p style="margin: 0; font-size: ${stat.labelFontSize}px; color: #666;">${stat.label}</p>
+            </div>`;
+        })
+        .join("");
+      return `<div style="width: ${width}; margin: 20px 0;">${statsHtml}</div>`;
+    }
+    case "features": {
+      const featuresBlock = block as any;
+      const width = `${featuresBlock.width}${featuresBlock.widthUnit}`;
+      const featuresHtml = featuresBlock.features
+        ?.map((feature: any) => {
+          return `<div style="flex: 1; min-width: 0; text-align: center; padding: 0 10px; box-sizing: border-box;">
+              <div style="background-color: ${feature.backgroundColor}; border-radius: ${feature.borderRadius}px; padding: ${feature.padding}px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%;">
+                <div style="font-size: 32px; margin-bottom: 12px; line-height: 1;">${feature.icon}</div>
+                <h3 style="margin: 0 0 8px 0; font-size: ${feature.titleFontSize}px; font-weight: bold; color: ${feature.textColor};">${feature.title}</h3>
+                <p style="margin: 0; font-size: ${feature.fontSize}px; color: ${feature.textColor}; line-height: 1.5;">${feature.description}</p>
+              </div>
+            </div>`;
+        })
+        .join("");
+      return `<div style="width: ${width}; margin: 20px 0; display: flex; flex-wrap: nowrap; gap: 0; align-items: stretch;">${featuresHtml}</div>`;
+    }
     case "divider":
       return `<hr style="border: none; border-top: ${block.height}px solid ${block.color}; margin: ${block.margin}px 0;" />`;
     case "product": {
@@ -892,8 +983,35 @@ export function renderBlockToHTML(block: ContentBlock): string {
     }
     case "navigation":
       return `<nav style="background-color: ${block.backgroundColor}; padding: 10px 0; text-align: ${block.alignment};"><a href="#" style="color: ${block.textColor}; margin: 0 15px; text-decoration: none;">Link</a></nav>`;
-    case "header":
-      return `<div style="background-color: ${block.backgroundColor}; padding: ${block.padding}px; text-align: ${block.alignment};"><img src="${block.logo}" alt="Logo" style="max-width: 200px; height: auto;" /></div>`;
+    case "header": {
+      const headerBlock = block as HeaderBlock;
+      const linksHtml = headerBlock.links
+        .map(
+          (link, index) =>
+            `<a href="${link.url}" style="color: ${headerBlock.linksFontColor}; text-decoration: none; font-size: ${headerBlock.linksFontSize}px; margin: 0 5px;">${link.text}</a>${
+              index < headerBlock.links.length - 1
+                ? `<span style="color: ${headerBlock.linksFontColor}; margin: 0 5px;">|</span>`
+                : ""
+            }`,
+        )
+        .join("");
+
+      return `<div style="display: flex; align-items: center; justify-content: space-between; background-color: ${headerBlock.backgroundColor}; padding: ${headerBlock.padding}px; margin: ${headerBlock.margin}px; border-width: ${headerBlock.borderWidth}px; border-color: ${headerBlock.borderColor}; border-radius: ${headerBlock.borderRadius}px;">
+        <div style="flex-shrink: 0;">
+          ${
+            headerBlock.logo
+              ? `<img src="${headerBlock.logo}" alt="${headerBlock.logoAlt}" style="width: ${headerBlock.logoWidth}px; height: ${headerBlock.logoHeight}px; object-fit: contain;" />`
+              : ""
+          }
+        </div>
+        <div style="flex-grow: 1; text-align: center; padding: 0 20px;">
+          <span style="font-size: ${headerBlock.companyFontSize}px; color: ${headerBlock.companyFontColor}; font-weight: ${headerBlock.companyFontWeight};">${headerBlock.companyName}</span>
+        </div>
+        <div style="flex-shrink: 0;">
+          ${linksHtml}
+        </div>
+      </div>`;
+    }
     case "footer":
       return `<footer style="background-color: ${block.backgroundColor}; color: ${block.textColor}; font-size: ${block.fontSize}px; padding: ${block.padding}px; text-align: center;">${block.content}</footer>`;
     case "footer-with-social": {
