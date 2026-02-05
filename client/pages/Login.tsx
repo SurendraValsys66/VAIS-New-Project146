@@ -315,7 +315,6 @@ export default function Login() {
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_left,rgba(255,106,0,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(26,115,232,0.12),transparent_50%),radial-gradient(ellipse_at_top_right,rgba(0,196,140,0.12),transparent_40%)]"></div>
         {/* Glowing orbs */}
         <div className="absolute -top-32 -left-32 w-48 h-48 lg:w-72 lg:h-72 rounded-full bg-valasys-orange/25 blur-3xl"></div>
-        <div className="absolute -bottom-32 -right-32 w-48 h-48 lg:w-96 lg:h-96 rounded-full bg-valasys-blue/25 blur-3xl"></div>
 
         {aiElements.map((element, index) => (
           <div
