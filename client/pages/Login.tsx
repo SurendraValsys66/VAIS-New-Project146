@@ -608,9 +608,9 @@ export default function Login() {
             style={{ transitionDelay: "300ms" }}
           >
             {/* Compact Partners Section */}
-            <div className="space-y-1.5">
-              <div className="flex items-center space-x-1.5">
-                <Sparkles className="h-3 w-3 text-valasys-orange" />
+            <div className="space-y-1">
+              <div className="flex items-center space-x-1">
+                <Sparkles className="h-2.5 w-2.5 text-valasys-orange" />
                 <p className="text-xs font-semibold text-valasys-gray-900 uppercase tracking-widest">
                   Trusted Partners
                 </p>
