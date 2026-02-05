@@ -537,8 +537,8 @@ export default function Login() {
       <div className="hidden lg:flex relative bg-gradient-to-br from-valasys-orange/5 via-white to-valasys-blue/5 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-valasys-orange/10 blur-3xl"></div>
-          <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-valasys-blue/10 blur-3xl"></div>
+          <div className="absolute -top-32 -right-32 w-64 h-64 lg:w-96 lg:h-96 rounded-full bg-valasys-orange/10 blur-3xl"></div>
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 lg:w-96 lg:h-96 rounded-full bg-valasys-blue/10 blur-3xl"></div>
         </div>
 
         <div className="relative z-10 flex flex-col w-full h-full px-8 lg:px-12 py-8 lg:py-10">
