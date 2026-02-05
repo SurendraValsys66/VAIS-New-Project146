@@ -561,7 +561,7 @@ export default function Login() {
           </div>
 
           {/* Main Content Container */}
-          <div className="flex-1 flex flex-col justify-center space-y-4 lg:space-y-6">
+          <div className="flex-1 flex flex-col justify-center space-y-2 lg:space-y-3 py-3 lg:py-4">
             {/* Premium Video Showcase */}
             <div
               className={`transform transition-all duration-700 ease-out ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
