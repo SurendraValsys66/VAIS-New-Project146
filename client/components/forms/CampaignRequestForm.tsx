@@ -479,13 +479,40 @@ function DeliverablesDialog({
     0
   );
 
-  // Calculate coverage percentage
-  const maxPossible = 10000;
-  const coveragePercentage = Math.min((totalDeliverables / maxPossible) * 100, 99);
+  // Generate Database Reach data by Job Level
+  const jobLevelList = ["C-Level", "Vice President", "Director", "Manager", "Staff"];
+  const generateJobLevelData = () => {
+    const data: { [key: string]: { [key: string]: number } } = {};
 
-  // Estimated reach based on selections
-  const estimatedReach = Math.floor(totalDeliverables * 0.45);
-  const estimatedEngagement = Math.floor(estimatedReach * 0.15);
+    jobLevelList.forEach((level) => {
+      data[level] = {
+        [geolocations[0] || "Geo1"]: Math.floor(Math.random() * 50) + (geolocations.includes(geolocations[0]) ? 50 : 0),
+        [geolocations[1] || "Geo2"]: Math.floor(Math.random() * 50) + (geolocations.includes(geolocations[1]) ? 50 : 0),
+      };
+    });
+
+    return data;
+  };
+
+  const jobLevelData = generateJobLevelData();
+
+  // Generate Database Reach data by Employee Size
+  const employeeSizeList = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10,000", "10,000+"];
+  const generateEmployeeSizeData = () => {
+    const data: { [key: string]: { [key: string]: number } } = {};
+
+    employeeSizeList.forEach((size) => {
+      const isSelectedSize = size === employeeSize;
+      data[size] = {
+        [geolocations[0] || "Geo1"]: isSelectedSize ? Math.floor(Math.random() * 200) + 100 : 0,
+        [geolocations[1] || "Geo2"]: isSelectedSize ? Math.floor(Math.random() * 200) + 100 : 0,
+      };
+    });
+
+    return data;
+  };
+
+  const employeeSizeData = generateEmployeeSizeData();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
