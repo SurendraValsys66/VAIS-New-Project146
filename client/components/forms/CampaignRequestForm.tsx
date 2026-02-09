@@ -574,7 +574,8 @@ function DeliverablesDialog({
       <Button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600 flex items-center gap-2"
+        disabled={!isFormValid}
+        className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Info className="w-4 h-4" />
         Check Deliverables
