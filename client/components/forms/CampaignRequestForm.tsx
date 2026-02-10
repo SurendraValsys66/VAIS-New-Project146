@@ -5,10 +5,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -24,7 +20,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Upload,
+  X,
+  Check,
+  ChevronsUpDown,
+  FileText,
+  Trash2,
+  Info,
+  Globe,
+  Users,
+  Target,
+  Briefcase,
+  Download,
+  ChevronRight,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -39,20 +50,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Upload,
-  X,
-  Check,
-  ChevronsUpDown,
-  FileText,
-  Trash2,
-  Target,
-  Tag,
-  Building2,
-  ChevronRight,
-  ChevronLeft,
-  Edit,
-  Clock,
-} from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 // Form validation schema
@@ -72,15 +77,7 @@ const campaignFormSchema = z.object({
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
 
-// Steps definition matching BuildVAIS pattern
-const steps = [
-  { id: 1, name: "Campaign Details", icon: Tag },
-  { id: 2, name: "Target Criteria", icon: Target },
-  { id: 3, name: "Company Details", icon: Building2 },
-  { id: 4, name: "File Upload", icon: Upload },
-];
-
-// Mock data for options
+// Mock data
 const jobTitleOptions = [
   "Software Engineer",
   "Product Manager",
@@ -303,8 +300,8 @@ function FileUpload({ onFileChange, file }: FileUploadProps) {
   return (
     <div
       className={cn(
-        "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-        dragActive ? "border-primary bg-primary/5" : "border-gray-300",
+        "border-2 border-dashed rounded-lg p-8 text-center transition-colors bg-white",
+        dragActive ? "border-primary bg-primary/5" : "border-gray-200",
         "hover:border-primary hover:bg-primary/5",
       )}
       onDragEnter={handleDrag}
@@ -341,28 +338,592 @@ function FileUpload({ onFileChange, file }: FileUploadProps) {
       ) : (
         <div>
           <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 mb-1">
             Upload TAL File
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Drag and drop your file here, or click to browse
+          <p className="text-xs text-gray-500 mb-4">
+            .csv, .xlsx, .xls — max 3 MB
           </p>
           <label htmlFor="file-upload">
-            <Button type="button" variant="outline" asChild>
+            <Button
+              type="button"
+              variant="outline"
+              asChild
+              className="text-orange-500 border-orange-500"
+            >
               <span className="cursor-pointer">Choose File</span>
             </Button>
           </label>
-          <p className="text-xs text-gray-500 mt-2">
-            Supports CSV, Excel files up to 10MB
-          </p>
         </div>
       )}
     </div>
   );
 }
 
+// Deliverables Dialog component
+interface DeliverablesDialogProps {
+  jobTitles: string[];
+  jobFunctions: string[];
+  jobLevels: string[];
+  geolocations: string[];
+  industries: string[];
+  campaignName: string;
+  employeeSize: string;
+  revenue: string;
+  userHasFullPermission?: boolean;
+  isFormValid?: boolean;
+}
+
+type CampaignStatus = "pending" | "accepted" | "declined";
+
+function DeliverablesDialog({
+  jobTitles,
+  jobFunctions,
+  jobLevels,
+  geolocations,
+  industries,
+  campaignName,
+  employeeSize,
+  revenue,
+  userHasFullPermission = true,
+  isFormValid = true,
+}: DeliverablesDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [campaignStatus, setCampaignStatus] =
+    useState<CampaignStatus>("pending");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Region mappings
+  const regionMap: { [key: string]: string } = {
+    "United States": "NAMER",
+    Canada: "NAMER",
+    Mexico: "LATAM",
+    Brazil: "LATAM",
+    "United Kingdom": "EMEA",
+    Germany: "EMEA",
+    France: "EMEA",
+    Australia: "APAC",
+    India: "APAC",
+    Singapore: "APAC",
+    Japan: "APAC",
+  };
+
+  const regionInfo: {
+    [key: string]: {
+      color: string;
+      bgColor: string;
+      borderColor: string;
+      description: string;
+      countries: string[];
+    };
+  } = {
+    NAMER: {
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200",
+      description: "North America & Mexico",
+      countries: ["United States", "Canada", "Mexico"],
+    },
+    EMEA: {
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      borderColor: "border-green-200",
+      description: "Europe, Middle East & Africa",
+      countries: ["United Kingdom", "Germany", "France"],
+    },
+    APAC: {
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-200",
+      description: "Asia Pacific",
+      countries: ["Australia", "India", "Singapore", "Japan"],
+    },
+    LATAM: {
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      borderColor: "border-amber-200",
+      description: "Latin America",
+      countries: ["Mexico", "Brazil"],
+    },
+    MENA: {
+      color: "text-rose-600",
+      bgColor: "bg-rose-50",
+      borderColor: "border-rose-200",
+      description: "Middle East & North Africa",
+      countries: [],
+    },
+  };
+
+  // Calculate deliverables by region
+  const regionDeliverables: { [key: string]: number } = {
+    NAMER: 0,
+    EMEA: 0,
+    APAC: 0,
+    LATAM: 0,
+    MENA: 0,
+  };
+
+  const regionBreakdown: { [key: string]: string[] } = {
+    NAMER: [],
+    EMEA: [],
+    APAC: [],
+    LATAM: [],
+    MENA: [],
+  };
+
+  // Calculate based on selections
+  geolocations.forEach((geo) => {
+    const region = regionMap[geo] || "MENA";
+    const baseCount = Math.max(
+      jobTitles.length * jobFunctions.length * (industries.length || 1) * 15,
+      150,
+    );
+    regionDeliverables[region] += baseCount + Math.floor(Math.random() * 200);
+    regionBreakdown[region].push(geo);
+  });
+
+  // If no selections, show default counts
+  if (geolocations.length === 0) {
+    regionDeliverables.NAMER = 1250;
+    regionDeliverables.EMEA = 980;
+    regionDeliverables.APAC = 750;
+    regionDeliverables.LATAM = 450;
+    regionDeliverables.MENA = 320;
+  }
+
+  const totalDeliverables = Object.values(regionDeliverables).reduce(
+    (a, b) => a + b,
+    0,
+  );
+
+  // Limit geolocations to top 5
+  const selectedGeolocations = geolocations.slice(0, 5);
+
+  // Use only selected job levels (no limit)
+  const selectedJobLevels =
+    jobLevels.length > 0
+      ? jobLevels
+      : ["C-Level", "Vice President", "Director", "Manager", "Staff"];
+
+  // Generate Database Reach data by Job Level
+  const generateJobLevelData = () => {
+    const data: { [key: string]: { [key: string]: number } } = {};
+
+    selectedJobLevels.forEach((level) => {
+      data[level] = {};
+      selectedGeolocations.forEach((geo) => {
+        data[level][geo] = Math.floor(Math.random() * 50) + 30;
+      });
+    });
+
+    return data;
+  };
+
+  const jobLevelData = generateJobLevelData();
+
+  // Calculate Job Level total count
+  const jobLevelTotal = selectedJobLevels.reduce((sum, level) => {
+    const levelTotal = selectedGeolocations.reduce(
+      (geoSum, geo) => geoSum + (jobLevelData[level]?.[geo] || 0),
+      0,
+    );
+    return sum + levelTotal;
+  }, 0);
+
+  // Use only selected employee sizes (no limit)
+  const selectedEmployeeSizeList = employeeSize
+    ? [employeeSize]
+    : [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-500",
+        "501-1000",
+        "1001-5000",
+        "5001-10,000",
+        "10,000+",
+      ];
+
+  // Generate Database Reach data by Employee Size
+  const generateEmployeeSizeData = () => {
+    const data: { [key: string]: { [key: string]: number } } = {};
+
+    selectedEmployeeSizeList.forEach((size) => {
+      data[size] = {};
+      selectedGeolocations.forEach((geo) => {
+        data[size][geo] = Math.floor(Math.random() * 200) + 100;
+      });
+    });
+
+    return data;
+  };
+
+  const employeeSizeData = generateEmployeeSizeData();
+
+  // Calculate Employee Size total count
+  const employeeSizeTotal = selectedEmployeeSizeList.reduce((sum, size) => {
+    const sizeTotal = selectedGeolocations.reduce(
+      (geoSum, geo) => geoSum + (employeeSizeData[size]?.[geo] || 0),
+      0,
+    );
+    return sum + sizeTotal;
+  }, 0);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={!isFormValid}
+        className="text-xs bg-orange-500 text-white border-orange-500 hover:bg-orange-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <Info className="w-4 h-4" />
+        Check Deliverables
+      </Button>
+
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-gray-900">
+            Deliverables Overview
+          </DialogTitle>
+          <DialogDescription className="text-base mt-1">
+            {campaignName || "Your Campaign"} - Database Reach Analysis &
+            Campaign Summary
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* Database Reach Tabs */}
+          <Tabs defaultValue="job-level" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="job-level" className="text-sm font-medium">
+                Job Level (Total count {jobLevelTotal})
+              </TabsTrigger>
+              <TabsTrigger
+                value="employee-size"
+                className="text-sm font-medium"
+              >
+                Employee Size (Total count {employeeSizeTotal})
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Job Level Tab */}
+            <TabsContent value="job-level" className="mt-4">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
+                  <h4 className="text-sm font-bold text-gray-900">
+                    Database Reach by Job Level
+                  </h4>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Prospect counts distributed across selected geographies
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 bg-gray-50">
+                          Job Level
+                        </th>
+                        {selectedGeolocations.map((geo) => (
+                          <th
+                            key={geo}
+                            className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-gray-50"
+                          >
+                            {geo}
+                          </th>
+                        ))}
+                        <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-blue-50 font-bold">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedJobLevels.map((level, index) => {
+                        const levelTotal = selectedGeolocations.reduce(
+                          (sum, geo) => sum + (jobLevelData[level]?.[geo] || 0),
+                          0,
+                        );
+                        return (
+                          <tr
+                            key={level}
+                            className={`border-b border-gray-100 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-blue-50 transition-colors`}
+                          >
+                            <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                              {level}
+                            </td>
+                            {selectedGeolocations.map((geo) => (
+                              <td
+                                key={geo}
+                                className="px-6 py-3 text-sm text-center text-gray-600"
+                              >
+                                {jobLevelData[level]?.[geo] || 0}
+                              </td>
+                            ))}
+                            <td className="px-6 py-3 text-sm text-center font-bold text-blue-600">
+                              {levelTotal}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="bg-gradient-to-r from-blue-100 to-blue-50 border-t-2 border-blue-200 font-bold">
+                        <td className="px-6 py-3 text-sm text-gray-900">
+                          Total
+                        </td>
+                        {selectedGeolocations.map((geo) => (
+                          <td
+                            key={geo}
+                            className="px-6 py-3 text-sm text-center text-gray-900"
+                          >
+                            {selectedJobLevels.reduce(
+                              (sum, level) =>
+                                sum + (jobLevelData[level]?.[geo] || 0),
+                              0,
+                            )}
+                          </td>
+                        ))}
+                        <td className="px-6 py-3 text-sm text-center text-blue-700">
+                          {jobLevelTotal}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Employee Size Tab */}
+            <TabsContent value="employee-size" className="mt-4">
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b border-gray-200">
+                  <h4 className="text-sm font-bold text-gray-900">
+                    Database Reach by Employee Size
+                  </h4>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Prospect counts by company size across selected geographies
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 bg-gray-50">
+                          Employee Size
+                        </th>
+                        {selectedGeolocations.map((geo) => (
+                          <th
+                            key={geo}
+                            className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-gray-50"
+                          >
+                            {geo}
+                          </th>
+                        ))}
+                        <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 bg-emerald-50 font-bold">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedEmployeeSizeList.map((size, index) => {
+                        const sizeTotal = selectedGeolocations.reduce(
+                          (sum, geo) =>
+                            sum + (employeeSizeData[size]?.[geo] || 0),
+                          0,
+                        );
+                        return (
+                          <tr
+                            key={size}
+                            className={`border-b border-gray-100 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-emerald-50 transition-colors`}
+                          >
+                            <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                              {size}
+                            </td>
+                            {selectedGeolocations.map((geo) => (
+                              <td
+                                key={geo}
+                                className="px-6 py-3 text-sm text-center text-gray-600"
+                              >
+                                {employeeSizeData[size]?.[geo] || 0}
+                              </td>
+                            ))}
+                            <td className="px-6 py-3 text-sm text-center font-bold text-emerald-600">
+                              {sizeTotal}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="bg-gradient-to-r from-emerald-100 to-emerald-50 border-t-2 border-emerald-200 font-bold">
+                        <td className="px-6 py-3 text-sm text-gray-900">
+                          Total
+                        </td>
+                        {selectedGeolocations.map((geo) => (
+                          <td
+                            key={geo}
+                            className="px-6 py-3 text-sm text-center text-gray-900"
+                          >
+                            {selectedEmployeeSizeList.reduce(
+                              (sum, size) =>
+                                sum + (employeeSizeData[size]?.[geo] || 0),
+                              0,
+                            )}
+                          </td>
+                        ))}
+                        <td className="px-6 py-3 text-sm text-center text-emerald-700">
+                          {employeeSizeTotal}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Campaign Actions */}
+          {userHasFullPermission && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 border border-amber-200">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-orange-600" />
+                Campaign Decision
+              </h3>
+
+              {campaignStatus === "pending" && (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-700 mb-4">
+                    Do you want to proceed with this campaign?
+                  </p>
+                  <div className="flex gap-3 justify-end">
+                    <Button
+                      type="button"
+                      onClick={() => setCampaignStatus("declined")}
+                      variant="destructive"
+                      className="font-medium"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Decline Campaign
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setShowConfirmation(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Accept Campaign
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {campaignStatus === "accepted" && (
+                <div className="bg-green-50 border border-green-200 rounded p-4 flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-green-900">
+                      Campaign Accepted
+                    </p>
+                    <p className="text-sm text-green-700 mt-1">
+                      Our team will contact you shortly with next steps.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {campaignStatus === "declined" && (
+                <div className="bg-red-50 border border-red-200 rounded p-4 flex items-center gap-3">
+                  <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-red-900">
+                      Campaign Declined
+                    </p>
+                    <p className="text-sm text-red-700 mt-1">
+                      This campaign has been marked as declined. You can start a
+                      new campaign request.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Important Information */}
+          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Info className="w-3 h-3 text-blue-600" />
+              Important Information
+            </h3>
+            <ul className="space-y-2">
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
+                  These are estimated counts based on current database. Final
+                  numbers may vary slightly
+                </span>
+              </li>
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
+                  You can export the deliverables in CSV, Excel, or JSON format
+                </span>
+              </li>
+              <li className="flex gap-2 text-gray-700">
+                <ChevronRight className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span className="text-xs">
+                  All deliverables include verified contact information and
+                  professional background
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </DialogContent>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900">
+              Confirm Campaign Acceptance
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-blue-900">Thank you!</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  Our team will contact you shortly.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowConfirmation(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setCampaignStatus("accepted");
+                setShowConfirmation(false);
+                setOpen(false);
+              }}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            >
+              Confirm
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Dialog>
+  );
+}
+
 export default function CampaignRequestForm() {
-  const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const form = useForm<CampaignFormData>({
@@ -382,7 +943,6 @@ export default function CampaignRequestForm() {
   const onSubmit = (data: CampaignFormData) => {
     console.log("Form submitted:", data);
     console.log("Uploaded file:", uploadedFile);
-    // Handle form submission here
   };
 
   const isFormValid = () => {
@@ -399,334 +959,158 @@ export default function CampaignRequestForm() {
     );
   };
 
-  const getStepProgress = () => {
-    let progress = 0;
-    const values = form.watch();
-
-    // Step 1: Campaign Details
-    if (values.campaignName) progress = 25;
-
-    // Step 2: Target Criteria
-    if (
-      values.jobTitles?.length > 0 &&
-      values.jobFunctions?.length > 0 &&
-      values.jobLevels?.length > 0 &&
-      values.geolocations?.length > 0 &&
-      values.industries?.length > 0
-    )
-      progress = 50;
-
-    // Step 3: Company Details
-    if (values.employeeSize && values.revenue) progress = 75;
-
-    // Step 4: Complete
-    if (progress === 75) progress = 100;
-
-    return progress;
-  };
-
-  const isStepValid = (step: number) => {
-    const values = form.watch();
-    switch (step) {
-      case 1:
-        return !!values.campaignName;
-      case 2:
-        return (
-          values.jobTitles?.length > 0 &&
-          values.jobFunctions?.length > 0 &&
-          values.jobLevels?.length > 0 &&
-          values.geolocations?.length > 0 &&
-          values.industries?.length > 0
-        );
-      case 3:
-        return !!values.employeeSize && !!values.revenue;
-      case 4:
-        return true; // File upload is optional
-      default:
-        return false;
-    }
-  };
-
   return (
     <Form {...form}>
-      <div className="w-full space-y-6">
-        {/* Enhanced Header with Progress */}
-        <Card className="bg-gradient-to-r from-valasys-orange/5 to-valasys-blue/5 border-valasys-orange/20">
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <CardTitle className="flex items-center text-2xl">
-                <Target className="w-6 h-6 mr-3 text-valasys-orange" />
-                Build My Campaign
-              </CardTitle>
-            </div>
-
-            {/* Step Progress Indicator */}
-            <div className="space-y-4">
-              <div className="w-full overflow-hidden flex flex-col lg:flex-row items-start lg:items-center gap-3 md:gap-4 px-1 md:px-0">
-                {steps.map((step, index) => {
-                  const StepIcon = step.icon;
-                  const isActive = currentStep === step.id;
-                  const isCompleted = isStepValid(step.id);
-
-                  return (
-                    <div key={step.id} className="flex items-center shrink-0">
-                      <div
-                        className={cn(
-                          "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full border-2 transition-all",
-                          isActive
-                            ? "border-valasys-orange bg-valasys-orange text-white"
-                            : isCompleted
-                              ? "border-green-500 bg-green-500 text-white"
-                              : "border-gray-300 bg-white text-gray-400",
-                        )}
-                      >
-                        {isCompleted && !isActive ? (
-                          <Check className="w-5 h-5" />
-                        ) : (
-                          <StepIcon className="w-5 h-5" />
-                        )}
-                      </div>
-                      <span
-                        className={cn(
-                          "ml-2 text-sm font-medium truncate max-w-[7rem] md:max-w-none",
-                          isActive
-                            ? "text-valasys-orange"
-                            : isCompleted
-                              ? "text-green-600"
-                              : "text-gray-500",
-                        )}
-                      >
-                        {step.name}
-                      </span>
-                      {index < steps.length - 1 && (
-                        <>
-                          <div
-                            className={cn(
-                              "hidden lg:block h-0.5 mx-4 flex-1 min-w-[2rem]",
-                              isCompleted ? "bg-green-500" : "bg-gray-300",
-                            )}
-                          />
-                          <div
-                            className={cn(
-                              "lg:hidden w-0.5 h-6 my-3 ml-5 flex-shrink-0",
-                              isCompleted ? "bg-green-500" : "bg-gray-300",
-                            )}
-                          />
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* LEFT COLUMN */}
+          <div className="space-y-6">
+            {/* Section 1: Campaign Details */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  1
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Campaign Details
+                </h3>
               </div>
-              <Progress value={getStepProgress()} className="h-2" />
+              <p className="text-xs text-gray-600 mb-4">
+                Campaign name, company size & revenue
+              </p>
+
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="campaignName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Campaign Name *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter campaign name"
+                          {...field}
+                          className="h-9 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="employeeSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Employee Size
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select employee size range" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {employeeSizeOptions.map((size) => (
+                            <SelectItem key={size} value={size}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="revenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Revenue
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select revenue range" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {revenueOptions.map((revenue) => (
+                            <SelectItem key={revenue} value={revenue}>
+                              {revenue}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <p className="text-valasys-gray-600">
-              Configure your campaign parameters to generate targeted prospect
-              lists
-            </p>
-          </CardHeader>
-        </Card>
+            {/* Section 3: File Upload */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  3
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  File Upload
+                </h3>
+              </div>
+              <p className="text-xs text-gray-600 mb-4">Upload TAL File</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Step 1: Campaign Details */}
-              <Card
-                className={cn(
-                  "transition-all duration-200",
-                  currentStep === 1
-                    ? "ring-2 ring-valasys-orange/50 shadow-lg"
-                    : "",
-                )}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center mr-3",
-                          isStepValid(1)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-600",
-                        )}
-                      >
-                        {isStepValid(1) ? <Check className="w-4 h-4" /> : "1"}
-                      </div>
-                      Campaign Details
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentStep(1)}
-                    >
-                      Edit
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <FileUpload onFileChange={setUploadedFile} file={uploadedFile} />
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="space-y-6">
+            {/* Section 2: Target Criteria */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-semibold">
+                  2
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Target Criteria
+                </h3>
+              </div>
+              <p className="text-xs text-gray-600 mb-4">
+                Select job titles, levels & locations
+              </p>
+
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <FormField
                     control={form.control}
-                    name="campaignName"
+                    name="jobTitles"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Campaign Name *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter campaign name"
-                            {...field}
-                            className={cn(
-                              field.value ? "border-green-300" : "",
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-                    <Button
-                      type="button"
-                      onClick={() => setCurrentStep(2)}
-                      disabled={!isStepValid(1)}
-                      className="w-full sm:w-auto whitespace-normal text-center text-xs sm:text-sm"
-                    >
-                      Next: Target Criteria
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Step 2: Target Criteria */}
-              <Card
-                className={cn(
-                  "transition-all duration-200 mt-6",
-                  currentStep === 2
-                    ? "ring-2 ring-valasys-orange/50 shadow-lg"
-                    : "",
-                )}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center mr-3",
-                          isStepValid(2)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-600",
-                        )}
-                      >
-                        {isStepValid(2) ? <Check className="w-4 h-4" /> : "2"}
-                      </div>
-                      Target Criteria
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentStep(2)}
-                    >
-                      Edit
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="jobTitles"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Title *</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={jobTitleOptions}
-                              selected={field.value}
-                              onSelectedChange={field.onChange}
-                              placeholder="Select job titles"
-                              searchPlaceholder="Search job titles..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="jobFunctions"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Function *</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={jobFunctionOptions}
-                              selected={field.value}
-                              onSelectedChange={field.onChange}
-                              placeholder="Select job functions"
-                              searchPlaceholder="Search job functions..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="jobLevels"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Level *</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={jobLevelOptions}
-                              selected={field.value}
-                              onSelectedChange={field.onChange}
-                              placeholder="Select job levels"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="geolocations"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Geolocation *</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={geolocationOptions}
-                              selected={field.value}
-                              onSelectedChange={field.onChange}
-                              placeholder="Select locations"
-                              searchPlaceholder="Search locations..."
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="industries"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Industry *</FormLabel>
+                        <FormLabel className="text-xs font-medium">
+                          Job Title
+                        </FormLabel>
                         <FormControl>
                           <MultiSelect
-                            options={industryOptions}
+                            options={jobTitleOptions}
                             selected={field.value}
                             onSelectedChange={field.onChange}
-                            placeholder="Select industries"
-                            searchPlaceholder="Search industries..."
+                            placeholder="Select job titles"
+                            searchPlaceholder="Search..."
                           />
                         </FormControl>
                         <FormMessage />
@@ -734,262 +1118,144 @@ export default function CampaignRequestForm() {
                     )}
                   />
 
-                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(1)}
-                      className="w-full sm:w-auto text-xs sm:text-sm"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setCurrentStep(3)}
-                      disabled={!isStepValid(2)}
-                      className="w-full sm:w-auto whitespace-normal text-center text-xs sm:text-sm"
-                    >
-                      Next: Company Details
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Step 3: Company Details */}
-              <Card
-                className={cn(
-                  "transition-all duration-200 mt-6",
-                  currentStep === 3
-                    ? "ring-2 ring-valasys-orange/50 shadow-lg"
-                    : "",
-                )}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center mr-3",
-                          isStepValid(3)
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-600",
-                        )}
-                      >
-                        {isStepValid(3) ? <Check className="w-4 h-4" /> : "3"}
-                      </div>
-                      Company Details
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentStep(3)}
-                    >
-                      Edit
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="employeeSize"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Employee Size *</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger
-                                className={cn(
-                                  field.value ? "border-green-300" : "",
-                                )}
-                              >
-                                <SelectValue placeholder="Select employee size range" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {employeeSizeOptions.map((size) => (
-                                <SelectItem key={size} value={size}>
-                                  {size}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="revenue"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Revenue *</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger
-                                className={cn(
-                                  field.value ? "border-green-300" : "",
-                                )}
-                              >
-                                <SelectValue placeholder="Select revenue range" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {revenueOptions.map((revenue) => (
-                                <SelectItem key={revenue} value={revenue}>
-                                  {revenue}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(2)}
-                      className="w-full sm:w-auto text-xs sm:text-sm"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setCurrentStep(4)}
-                      disabled={!isStepValid(3)}
-                      className="w-full sm:w-auto whitespace-normal text-center text-xs sm:text-sm"
-                    >
-                      Next: File Upload
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Step 4: File Upload */}
-              <Card
-                className={cn(
-                  "transition-all duration-200 mt-6",
-                  currentStep === 4
-                    ? "ring-2 ring-valasys-orange/50 shadow-lg"
-                    : "",
-                )}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center mr-3",
-                          uploadedFile
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-600",
-                        )}
-                      >
-                        {uploadedFile ? <Check className="w-4 h-4" /> : "4"}
-                      </div>
-                      Upload Suppression File
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCurrentStep(4)}
-                    >
-                      Edit
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FileUpload
-                    onFileChange={setUploadedFile}
-                    file={uploadedFile}
+                  <FormField
+                    control={form.control}
+                    name="jobFunctions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Job Function *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={jobFunctionOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select job functions"
+                            searchPlaceholder="Search..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-
-                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-between">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setCurrentStep(3)}
-                      className="w-full sm:w-auto text-xs sm:text-sm"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="w-full sm:w-auto bg-valasys-orange hover:bg-valasys-orange/90 whitespace-normal text-center text-xs sm:text-sm"
-                      disabled={!isFormValid()}
-                    >
-                      Submit Campaign Request
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </form>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Campaign Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Progress</p>
-                  <Progress value={getStepProgress()} className="h-2" />
-                  <p className="text-xs text-muted-foreground">
-                    {Math.round(getStepProgress())}% Complete
-                  </p>
                 </div>
 
-                {form.watch("campaignName") && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Campaign Name</p>
-                    <p className="text-sm text-muted-foreground">
-                      {form.watch("campaignName")}
-                    </p>
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="jobLevels"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Job Level *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={jobLevelOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select levels"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {form.watch("jobTitles")?.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Selected Job Titles</p>
-                    <div className="flex flex-wrap gap-1">
-                      {form
-                        .watch("jobTitles")
-                        ?.slice(0, 3)
-                        .map((title) => (
-                          <Badge
-                            key={title}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {title}
-                          </Badge>
-                        ))}
-                      {form.watch("jobTitles")?.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{form.watch("jobTitles").length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  <FormField
+                    control={form.control}
+                    name="geolocations"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium">
+                          Geolocation *
+                        </FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            options={geolocationOptions}
+                            selected={field.value}
+                            onSelectedChange={field.onChange}
+                            placeholder="Select locations"
+                            searchPlaceholder="Search..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="industries"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">
+                        Industry
+                      </FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={industryOptions}
+                          selected={field.value}
+                          onSelectedChange={field.onChange}
+                          placeholder="Select industries"
+                          searchPlaceholder="Search..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Section 4: Submit Campaign */}
+            <div className="bg-gradient-to-b from-orange-50 to-orange-100 border-2 border-orange-300 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-sm font-semibold">
+                    4
+                  </span>
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Submit Campaign
+                  </h3>
+                </div>
+                <DeliverablesDialog
+                  jobTitles={form.watch("jobTitles")}
+                  jobFunctions={form.watch("jobFunctions")}
+                  jobLevels={form.watch("jobLevels")}
+                  geolocations={form.watch("geolocations")}
+                  industries={form.watch("industries")}
+                  campaignName={form.watch("campaignName")}
+                  employeeSize={form.watch("employeeSize")}
+                  revenue={form.watch("revenue")}
+                  isFormValid={isFormValid()}
+                />
+              </div>
+
+              <p className="text-xs text-gray-700 mb-3">
+                Review and submit your campaign request
+              </p>
+
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                <p className="text-xs text-blue-800">
+                  All required fields have been filled. Click the button below
+                  to submit your campaign request.
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium h-10"
+                disabled={!isFormValid()}
+              >
+                Submit Campaign Request
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </form>
     </Form>
   );
 }
