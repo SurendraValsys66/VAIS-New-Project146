@@ -287,61 +287,48 @@ export function AIEmailGeneratorModal({
                     </div>
 
                     {/* Email Content */}
-                    <div className="p-6 space-y-4">
+                    <div className="p-4 space-y-3">
                       {/* Subject Line */}
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                         <p className="text-xs font-semibold text-gray-600 mb-1">
-                          SUBJECT LINE
+                          SUBJECT
                         </p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-xs font-medium text-gray-900 line-clamp-2">
                           {sample.subject}
-                        </p>
-                        <p className="text-xs text-gray-600 mt-2">
-                          📊 Preview: {sample.preview}
                         </p>
                       </div>
 
                       {/* Email Body */}
-                      <div className="bg-white rounded-lg p-4 border border-gray-200 max-h-64 overflow-y-auto">
-                        <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed font-mono text-xs">
+                      <div className="bg-white rounded-lg p-3 border border-gray-200 max-h-32 overflow-y-auto">
+                        <div className="text-xs text-gray-800 whitespace-pre-wrap leading-relaxed font-mono">
                           {sample.body}
                         </div>
                       </div>
 
-                      {/* CTA */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-gray-600 font-medium">
-                            CALL TO ACTION
-                          </p>
-                          <p className="text-sm font-semibold text-blue-900">
-                            {sample.cta}
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleCopy(sample.body, sample.id)}
-                          className={cn(
-                            "gap-1 text-xs",
-                            copiedId === sample.id
-                              ? "bg-green-600 hover:bg-green-700"
-                              : "bg-blue-600 hover:bg-blue-700",
-                          )}
-                        >
-                          {copiedId === sample.id ? (
-                            <>
-                              <Check className="w-3 h-3" />
-                              Copied
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3 h-3" />
-                              Copy Email
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                      {/* Copy Button */}
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleCopy(sample.body, sample.id)}
+                        className={cn(
+                          "w-full gap-1 text-xs",
+                          copiedId === sample.id
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-blue-600 hover:bg-blue-700",
+                        )}
+                      >
+                        {copiedId === sample.id ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Copied to Clipboard
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            Copy Email
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
 
