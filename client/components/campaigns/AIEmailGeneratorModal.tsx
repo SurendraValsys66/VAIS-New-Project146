@@ -304,6 +304,11 @@ Best regards,
             />
           </div>
 
+          {/* Divider */}
+          {generatedEmails.length > 0 && (
+            <div className="border-t border-gray-200"></div>
+          )}
+
           {/* GENERATED EMAILS SECTION - TABS */}
           {generatedEmails.length > 0 && (
             <div className="space-y-4">
