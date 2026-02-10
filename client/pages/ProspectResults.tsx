@@ -1034,10 +1034,16 @@ export default function ProspectResults() {
                     variant="outline"
                     className="relative text-valasys-orange border-valasys-orange hover:bg-orange-50 hover:text-valasys-orange"
                   >
-                    <Heart className="w-4 h-4 mr-2" fill={favorites.length > 0 ? "currentColor" : "none"} />
+                    <Heart
+                      className="w-4 h-4 mr-2"
+                      fill={favorites.length > 0 ? "currentColor" : "none"}
+                    />
                     <span className="hidden sm:inline">Favorites</span>
                     {favorites.length > 0 && (
-                      <Badge variant="destructive" className="ml-2 h-5 min-w-5 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 text-white text-xs font-bold">
+                      <Badge
+                        variant="destructive"
+                        className="ml-2 h-5 min-w-5 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 text-white text-xs font-bold"
+                      >
                         {favorites.length}
                       </Badge>
                     )}
