@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Sparkles, X, FileText, Check } from "lucide-react";
+import { Copy, Sparkles, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatGPTLikeInput } from "./ChatGPTLikeInput";
 
