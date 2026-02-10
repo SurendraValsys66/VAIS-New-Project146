@@ -1344,6 +1344,15 @@ export default function CampaignRequestForm() {
             </div>
           </div>
         </div>
+
+        {/* Section 5: Campaign Assets - Full Width */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-6">
+          <AssetSelector
+            selectedAssets={selectedAssets}
+            onAssetsChange={setSelectedAssets}
+            isFormValid={isFormValid()}
+          />
+        </div>
       </form>
     </Form>
   );
