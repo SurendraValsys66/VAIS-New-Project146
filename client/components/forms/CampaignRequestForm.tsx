@@ -1341,17 +1341,145 @@ export default function CampaignRequestForm() {
               >
                 Submit Campaign Request
               </Button>
+
+              {/* Asset Buttons - Below Submit Button */}
+              <div className="mt-4">
+                <p className="text-xs text-gray-600 mb-3 font-medium">
+                  Add Campaign Assets (Optional)
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {/* AI Email Generator Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const emailAsset: SelectedAsset = {
+                        id: "email-gen",
+                        type: "email",
+                        name: "AI Email Generator",
+                        description:
+                          "Generate personalized emails with AI-powered subject lines and body copy",
+                        config: {},
+                      };
+                      if (
+                        selectedAssets.some((a) => a.id === emailAsset.id)
+                      ) {
+                        setSelectedAssets(
+                          selectedAssets.filter((a) => a.id !== emailAsset.id),
+                        );
+                      } else {
+                        setSelectedAssets([...selectedAssets, emailAsset]);
+                      }
+                    }}
+                    className={cn(
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2",
+                      selectedAssets.some((a) => a.id === "email-gen")
+                        ? "bg-blue-100 border-blue-500 text-blue-900"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300",
+                    )}
+                  >
+                    <Mail className="w-3 h-3" />
+                    <span>Email Gen</span>
+                    {selectedAssets.some((a) => a.id === "email-gen") && (
+                      <Check className="w-3 h-3 ml-auto" />
+                    )}
+                  </button>
+
+                  {/* Landing Page Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const pageAsset: SelectedAsset = {
+                        id: "landing-page",
+                        type: "landing-page",
+                        name: "Landing Page Builder",
+                        description:
+                          "Create conversion-optimized landing pages matched to your campaign",
+                        config: {},
+                      };
+                      if (
+                        selectedAssets.some((a) => a.id === pageAsset.id)
+                      ) {
+                        setSelectedAssets(
+                          selectedAssets.filter((a) => a.id !== pageAsset.id),
+                        );
+                      } else {
+                        setSelectedAssets([...selectedAssets, pageAsset]);
+                      }
+                    }}
+                    className={cn(
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2",
+                      selectedAssets.some((a) => a.id === "landing-page")
+                        ? "bg-purple-100 border-purple-500 text-purple-900"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-purple-300",
+                    )}
+                  >
+                    <Globe className="w-3 h-3" />
+                    <span>Landing Page</span>
+                    {selectedAssets.some((a) => a.id === "landing-page") && (
+                      <Check className="w-3 h-3 ml-auto" />
+                    )}
+                  </button>
+
+                  {/* Upload Template Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const templateAsset: SelectedAsset = {
+                        id: "template-upload",
+                        type: "template",
+                        name: "Upload Template",
+                        description:
+                          "Upload your existing email or page templates",
+                        config: {},
+                      };
+                      if (
+                        selectedAssets.some((a) => a.id === templateAsset.id)
+                      ) {
+                        setSelectedAssets(
+                          selectedAssets.filter(
+                            (a) => a.id !== templateAsset.id,
+                          ),
+                        );
+                      } else {
+                        setSelectedAssets([...selectedAssets, templateAsset]);
+                      }
+                    }}
+                    className={cn(
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2",
+                      selectedAssets.some((a) => a.id === "template-upload")
+                        ? "bg-amber-100 border-amber-500 text-amber-900"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-amber-300",
+                    )}
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload Template</span>
+                    {selectedAssets.some((a) => a.id === "template-upload") && (
+                      <Check className="w-3 h-3 ml-auto" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Selected Assets Summary */}
+                {selectedAssets.length > 0 && (
+                  <div className="mt-3 bg-blue-50 border border-blue-200 rounded p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-blue-800 font-medium">
+                        {selectedAssets.length} asset
+                        {selectedAssets.length !== 1 ? "s" : ""} selected
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAssets([])}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Section 5: Campaign Assets - Full Width */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mt-6">
-          <AssetSelector
-            selectedAssets={selectedAssets}
-            onAssetsChange={setSelectedAssets}
-            isFormValid={isFormValid()}
-          />
         </div>
       </form>
     </Form>
