@@ -1293,7 +1293,7 @@ export default function CampaignRequestForm() {
                     type="button"
                     onClick={() => setEmailGeneratorOpen(true)}
                     className={cn(
-                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2",
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2 hidden",
                       selectedAssets.some((a) => a.id === "email-gen")
                         ? "bg-blue-100 border-blue-500 text-blue-900"
                         : "bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300",
