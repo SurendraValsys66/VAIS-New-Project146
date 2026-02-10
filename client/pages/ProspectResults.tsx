@@ -73,6 +73,7 @@ import {
   Briefcase,
   BadgeCheck,
   MoreVertical,
+  Heart,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -83,6 +84,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn, Link } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 import { FloatingStatsWidget } from "@/components/ui/floating-stats-widget";
 import { markStepCompleted } from "@/lib/masteryStorage";
 import { useToast } from "@/hooks/use-toast";
@@ -586,6 +588,7 @@ export default function ProspectResults() {
   });
 
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem("prospect:favorites");
@@ -608,6 +611,7 @@ export default function ProspectResults() {
     setFavorites((prev) => {
       const exists = prev.includes(id);
       const next = exists ? prev.filter((x) => x !== id) : [...prev, id];
+
       toast({
         title: exists ? "Removed from favorites" : "Added to favorites",
         description: name ? `${name}` : undefined,
@@ -1021,8 +1025,37 @@ export default function ProspectResults() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 w-full lg:w-auto">
-              <FloatingStatsWidget className="w-full lg:w-auto" />
+            <div className="flex items-center gap-3 w-full lg:w-auto justify-end">
+              {/* View Favorites Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => navigate("/favorites-prospects")}
+                    variant="outline"
+                    className="relative text-valasys-orange border-valasys-orange hover:bg-orange-50 hover:text-valasys-orange"
+                  >
+                    <Heart
+                      className="w-4 h-4 mr-2"
+                      fill={favorites.length > 0 ? "currentColor" : "none"}
+                    />
+                    <span className="hidden sm:inline">Favorites</span>
+                    {favorites.length > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="ml-2 h-5 min-w-5 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 text-white text-xs font-bold"
+                      >
+                        {favorites.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {favorites.length > 0
+                    ? `View your ${favorites.length} saved prospect${favorites.length !== 1 ? "s" : ""}`
+                    : "Save prospects to favorites to view them here"}
+                </TooltipContent>
+              </Tooltip>
+              <FloatingStatsWidget className="w-full lg:w-auto hidden sm:block" />
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,8 @@ import {
   Briefcase,
   Download,
   ChevronRight,
+  ChevronDown,
+  Mail,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -59,6 +62,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { AssetSelector, SelectedAsset } from "../campaigns/AssetSelector";
+import { AIEmailGeneratorModal } from "../campaigns/AIEmailGeneratorModal";
 
 // Form validation schema
 const campaignFormSchema = z.object({
@@ -69,10 +74,15 @@ const campaignFormSchema = z.object({
     .min(1, "At least one job function is required"),
   jobLevels: z.array(z.string()).min(1, "At least one job level is required"),
   geolocations: z.array(z.string()).min(1, "At least one location is required"),
-  employeeSize: z.string().min(1, "Employee size is required"),
-  revenue: z.string().min(1, "Revenue is required"),
+  employeeSize: z
+    .array(z.string())
+    .min(1, "At least one employee size is required"),
+  revenue: z
+    .array(z.string())
+    .min(1, "At least one revenue option is required"),
   industries: z.array(z.string()).min(1, "At least one industry is required"),
   talFile: z.any().optional(),
+  campaignAssets: z.array(z.any()).optional().default([]),
 });
 
 type CampaignFormData = z.infer<typeof campaignFormSchema>;
@@ -168,6 +178,7 @@ interface MultiSelectProps {
   onSelectedChange: (selected: string[]) => void;
   placeholder: string;
   searchPlaceholder?: string;
+  showSelectAll?: boolean;
 }
 
 function MultiSelect({
@@ -176,12 +187,24 @@ function MultiSelect({
   onSelectedChange,
   placeholder,
   searchPlaceholder = "Search...",
+  showSelectAll = false,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
 
   const handleUnselect = (item: string) => {
     onSelectedChange(selected.filter((i) => i !== item));
   };
+
+  const handleSelectAll = () => {
+    if (selected.length === options.length) {
+      onSelectedChange([]);
+    } else {
+      onSelectedChange([...options]);
+    }
+  };
+
+  const isAllSelected =
+    selected.length === options.length && options.length > 0;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -233,6 +256,20 @@ function MultiSelect({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
+              {showSelectAll && (
+                <CommandItem
+                  onSelect={handleSelectAll}
+                  className="font-medium bg-gray-50 hover:bg-blue-50"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      isAllSelected ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  Select All
+                </CommandItem>
+              )}
               {options.map((option) => (
                 <CommandItem
                   key={option}
@@ -368,8 +405,8 @@ interface DeliverablesDialogProps {
   geolocations: string[];
   industries: string[];
   campaignName: string;
-  employeeSize: string;
-  revenue: string;
+  employeeSize: string[];
+  revenue: string[];
   userHasFullPermission?: boolean;
   isFormValid?: boolean;
 }
@@ -531,18 +568,19 @@ function DeliverablesDialog({
   }, 0);
 
   // Use only selected employee sizes (no limit)
-  const selectedEmployeeSizeList = employeeSize
-    ? [employeeSize]
-    : [
-        "1-10",
-        "11-50",
-        "51-200",
-        "201-500",
-        "501-1000",
-        "1001-5000",
-        "5001-10,000",
-        "10,000+",
-      ];
+  const selectedEmployeeSizeList =
+    employeeSize && employeeSize.length > 0
+      ? employeeSize
+      : [
+          "1-10",
+          "11-50",
+          "51-200",
+          "201-500",
+          "501-1000",
+          "1001-5000",
+          "5001-10,000",
+          "10,000+",
+        ];
 
   // Generate Database Reach data by Employee Size
   const generateEmployeeSizeData = () => {
@@ -924,7 +962,11 @@ function DeliverablesDialog({
 }
 
 export default function CampaignRequestForm() {
+  const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [selectedAssets, setSelectedAssets] = useState<SelectedAsset[]>([]);
+  const [emailGeneratorOpen, setEmailGeneratorOpen] = useState(false);
+  const [landingPageDropdownOpen, setLandingPageDropdownOpen] = useState(false);
 
   const form = useForm<CampaignFormData>({
     resolver: zodResolver(campaignFormSchema),
@@ -934,15 +976,17 @@ export default function CampaignRequestForm() {
       jobFunctions: [],
       jobLevels: [],
       geolocations: [],
-      employeeSize: "",
-      revenue: "",
+      employeeSize: [],
+      revenue: [],
       industries: [],
+      campaignAssets: [],
     },
   });
 
   const onSubmit = (data: CampaignFormData) => {
     console.log("Form submitted:", data);
     console.log("Uploaded file:", uploadedFile);
+    console.log("Selected assets:", selectedAssets);
   };
 
   const isFormValid = () => {
@@ -954,8 +998,8 @@ export default function CampaignRequestForm() {
       values.jobLevels?.length > 0 &&
       values.geolocations?.length > 0 &&
       values.industries?.length > 0 &&
-      values.employeeSize &&
-      values.revenue
+      values.employeeSize?.length > 0 &&
+      values.revenue?.length > 0
     );
   };
 
@@ -1006,25 +1050,18 @@ export default function CampaignRequestForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium">
-                        Employee Size
+                        Employee Size *
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue placeholder="Select employee size range" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {employeeSizeOptions.map((size) => (
-                            <SelectItem key={size} value={size}>
-                              {size}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <MultiSelect
+                          options={employeeSizeOptions}
+                          selected={field.value}
+                          onSelectedChange={field.onChange}
+                          placeholder="Select employee size ranges"
+                          searchPlaceholder="Search..."
+                          showSelectAll={true}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1036,25 +1073,18 @@ export default function CampaignRequestForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-medium">
-                        Revenue
+                        Revenue *
                       </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue placeholder="Select revenue range" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {revenueOptions.map((revenue) => (
-                            <SelectItem key={revenue} value={revenue}>
-                              {revenue}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <MultiSelect
+                          options={revenueOptions}
+                          selected={field.value}
+                          onSelectedChange={field.onChange}
+                          placeholder="Select revenue ranges"
+                          searchPlaceholder="Search..."
+                          showSelectAll={true}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1111,6 +1141,7 @@ export default function CampaignRequestForm() {
                             onSelectedChange={field.onChange}
                             placeholder="Select job titles"
                             searchPlaceholder="Search..."
+                            showSelectAll={true}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1133,6 +1164,7 @@ export default function CampaignRequestForm() {
                             onSelectedChange={field.onChange}
                             placeholder="Select job functions"
                             searchPlaceholder="Search..."
+                            showSelectAll={true}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1156,6 +1188,7 @@ export default function CampaignRequestForm() {
                             selected={field.value}
                             onSelectedChange={field.onChange}
                             placeholder="Select levels"
+                            showSelectAll={true}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1178,6 +1211,7 @@ export default function CampaignRequestForm() {
                             onSelectedChange={field.onChange}
                             placeholder="Select locations"
                             searchPlaceholder="Search..."
+                            showSelectAll={true}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1201,6 +1235,7 @@ export default function CampaignRequestForm() {
                           onSelectedChange={field.onChange}
                           placeholder="Select industries"
                           searchPlaceholder="Search..."
+                          showSelectAll={true}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1252,10 +1287,149 @@ export default function CampaignRequestForm() {
               >
                 Submit Campaign Request
               </Button>
+
+              {/* Asset Buttons - Below Submit Button */}
+              <div className="mt-4">
+                <p className="text-xs text-gray-600 mb-3 font-medium">
+                  Add Campaign Assets (Optional)
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {/* AI Email Generator Button */}
+                  <button
+                    type="button"
+                    onClick={() => setEmailGeneratorOpen(true)}
+                    className={cn(
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2 hidden",
+                      selectedAssets.some((a) => a.id === "email-gen")
+                        ? "bg-blue-100 border-blue-500 text-blue-900"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300",
+                    )}
+                  >
+                    <Mail className="w-3 h-3" />
+                    <span>AI Email Generator</span>
+                    {selectedAssets.some((a) => a.id === "email-gen") && (
+                      <Check className="w-3 h-3 ml-auto" />
+                    )}
+                  </button>
+
+                  {/* Landing Page Dropdown Button */}
+                  <Popover
+                    open={landingPageDropdownOpen}
+                    onOpenChange={setLandingPageDropdownOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={cn(
+                          "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2 w-full",
+                          "bg-gray-50 border-gray-200 text-gray-700 hover:border-purple-300",
+                        )}
+                      >
+                        <Globe className="w-3 h-3" />
+                        <span>Landing Page</span>
+                        <ChevronDown className="w-3 h-3 ml-auto" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-0">
+                      <div className="flex flex-col">
+                        {/* Email Template Builder Option */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLandingPageDropdownOpen(false);
+                            navigate("/templates");
+                          }}
+                          className="px-4 py-3 text-xs text-left hover:bg-purple-50 border-b border-gray-200 flex items-center gap-2 transition-colors"
+                        >
+                          <Mail className="w-4 h-4 text-purple-600" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">
+                              Email Template Builder
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Design custom email templates
+                            </p>
+                          </div>
+                        </button>
+
+                        {/* Landing Page Builder Option */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLandingPageDropdownOpen(false);
+                            navigate("/landing-pages");
+                          }}
+                          className="px-4 py-3 text-xs text-left hover:bg-purple-50 flex items-center gap-2 transition-colors"
+                        >
+                          <Globe className="w-4 h-4 text-purple-600" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">
+                              Landing Page Builder
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Create conversion-optimized pages
+                            </p>
+                          </div>
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Upload Template Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const templateAsset: SelectedAsset = {
+                        id: "template-upload",
+                        type: "template",
+                        name: "Upload Template",
+                        description:
+                          "Upload your existing email or page templates",
+                        config: {},
+                      };
+                      if (
+                        selectedAssets.some((a) => a.id === templateAsset.id)
+                      ) {
+                        setSelectedAssets(
+                          selectedAssets.filter(
+                            (a) => a.id !== templateAsset.id,
+                          ),
+                        );
+                      } else {
+                        setSelectedAssets([...selectedAssets, templateAsset]);
+                      }
+                    }}
+                    className={cn(
+                      "py-2 px-3 rounded-lg text-xs font-medium transition-all border-2 flex items-center justify-center gap-2 hidden",
+                      selectedAssets.some((a) => a.id === "template-upload")
+                        ? "bg-amber-100 border-amber-500 text-amber-900"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:border-amber-300",
+                    )}
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload Template</span>
+                    {selectedAssets.some((a) => a.id === "template-upload") && (
+                      <Check className="w-3 h-3 ml-auto" />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </form>
+
+      {/* AI Email Generator Modal */}
+      <AIEmailGeneratorModal
+        isOpen={emailGeneratorOpen}
+        onClose={() => setEmailGeneratorOpen(false)}
+        campaignName={form.watch("campaignName")}
+        jobTitles={form.watch("jobTitles")}
+        jobFunctions={form.watch("jobFunctions")}
+        jobLevels={form.watch("jobLevels")}
+        geolocations={form.watch("geolocations")}
+        industries={form.watch("industries")}
+      />
     </Form>
   );
 }
